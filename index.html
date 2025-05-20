@@ -83,34 +83,20 @@
       text-align: center;
       display: none;
     }
-    #refresh-btn {
-      display: block;
-      margin: 20px auto;
-      padding: 10px 20px;
-      background-color: #3498db;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #refresh-btn:hover {
-      background-color: #2980b9;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Cell Biology Modules</h1>
     <p>Browse and open HTML modules from the CellBiologyModulesRepository.</p>
-    <button id="refresh-btn">Refresh List</button>
     <p id="error"></p>
     <ul id="file-list"></ul>
   </div>
 
   <script>
-    // Predefined list of HTML files (update this array when adding new files)
+    // Predefined list of HTML files (update this array manually when adding new files)
     const predefinedFiles = [
-      'module1.html',
+      'CourseGeneratorAI-Module-cell_structure_and_cell_theory_interactive-20250518.html',
       'module2.html',
       'module3.html'
       // Add new HTML files here, e.g., 'new_module.html'
@@ -118,7 +104,6 @@
 
     const fileList = document.getElementById('file-list');
     const errorDiv = document.getElementById('error');
-    const refreshBtn = document.getElementById('refresh-btn');
     const repositoryPath = 'CellBiologyModulesRepository/';
 
     // Function to display files in the UI
@@ -126,7 +111,7 @@
       fileList.innerHTML = '';
       errorDiv.style.display = 'none';
       if (files.length === 0) {
-        errorDiv.textContent = 'No HTML files found in the repository.';
+        errorDiv.textContent = 'No HTML files defined. Please add files to the predefinedFiles array.';
         errorDiv.style.display = 'block';
         return;
       }
@@ -141,36 +126,8 @@
       });
     }
 
-    // Function to attempt fetching directory listing
-    async function fetchDirectoryListing() {
-      try {
-        const response = await fetch(repositoryPath);
-        if (!response.ok) throw new Error('Directory listing not available.');
-        const text = await response.text();
-        // Parse HTML response for directory listing (if server provides it)
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
-        const links = Array.from(doc.querySelectorAll('a'))
-          .map(a => a.href.split('/').pop())
-          .filter(file => file.endsWith('.html'));
-        if (links.length > 0) {
-          displayFiles(links);
-        } else {
-          // Fall back to predefined list if no files found
-          displayFiles(predefinedFiles);
-        }
-      } catch (error) {
-        console.error('Error fetching directory:', error);
-        // Fall back to predefined list on error
-        displayFiles(predefinedFiles);
-      }
-    }
-
-    // Initial load
-    fetchDirectoryListing();
-
-    // Refresh button event listener
-    refreshBtn.addEventListener('click', fetchDirectoryListing);
+    // Display the predefined files on page load
+    displayFiles(predefinedFiles);
   </script>
 </body>
 </html>
