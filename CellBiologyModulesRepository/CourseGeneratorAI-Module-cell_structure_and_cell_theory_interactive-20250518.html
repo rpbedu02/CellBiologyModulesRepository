@@ -1,0 +1,708 @@
+
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cell Structure and Cell Theory</title><style>
+        :root { --primary: #0070f3; --primary-foreground: #ffffff; --background: #ffffff; --foreground: #000000; --muted: #f5f5f5; --muted-foreground: #6b7280; --border: #e5e7eb; --accent: #f3f4f6; --radius: 0.5rem; --success: #10b981; --destructive: #ef4444; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: var(--background); color: var(--foreground); }
+        body.modal-open { overflow: hidden; }
+        .container { max-width: 900px; margin: 1rem auto; padding: 1rem; }
+        body.modal-open .container { opacity: 0.3; filter: blur(4px); pointer-events: none; }
+        h1, h2, h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.6em; font-weight: 600; line-height: 1.2; }
+        h1 { font-size: 2em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em;}
+        p { margin-bottom: 1em; } ul, ol { margin-bottom: 1em; padding-left: 1.5em; }
+        .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+        .tab { padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab.active { border-bottom-color: var(--primary); color: var(--primary); }
+        .tab-content { display: none; } .tab-content.active { display: block; }
+        .module { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1.5em; overflow: hidden; }
+        .module-header { background-color: var(--muted); padding: 0.75em 1em; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .module-header h4 { margin: 0; } .module-toggle { transition: transform 0.3s ease; }
+        .module-content { padding: 1.5rem; display: none; }
+        .lesson { padding: 1.5rem 0; border-bottom: 1px solid var(--border); } .lesson:last-child { border-bottom: none; }
+        .lesson-number { background-color: var(--primary); color: var(--primary-foreground); padding: 0.1em 0.4em; border-radius: 0.25rem; margin-right: 0.5em; font-size: 0.8em; font-weight: bold; display: inline-block; }
+        .quiz-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; opacity: 0; transition: opacity 0.3s ease; }
+        .quiz-modal.visible { display: flex; opacity: 1; }
+        .quiz-modal-content { background-color:white; padding:2rem; border-radius:var(--radius); max-width:700px; width:90%; max-height:90vh; display:flex; flex-direction:column; position:relative; }
+        .quiz-modal-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:1rem; margin-bottom:1rem; }
+        .quiz-modal-title { margin:0; font-size:1.5rem; }
+        .quiz-modal-close-button { background:none; border:none; font-size:1.5rem; cursor:pointer; }
+        .quiz-modal-body { overflow-y:auto; flex-grow:1; }
+        .quiz-question { margin-bottom:1.5rem; } .quiz-options { list-style:none; padding:0; }
+        .quiz-option { padding:.75rem; border:1px solid var(--border); border-radius:.25rem; margin-bottom:.5rem; cursor:pointer; }
+        .quiz-option:hover { background-color:var(--accent); }
+        .quiz-option.selected { border-color:var(--primary); background-color:rgba(0,112,243,0.1); }
+        .quiz-option.correct { border-color:var(--success); background-color:rgba(16,185,129,0.1); font-weight:bold; }
+        .quiz-option.incorrect { border-color:var(--destructive); background-color:rgba(239,68,68,0.1); text-decoration:line-through; }
+        .quiz-option.disabled { pointer-events:none; opacity:0.7; }
+        .quiz-explanation { margin-top:1rem; padding:1rem; background-color:rgba(0,0,0,0.05); border-radius:.25rem; display:none; border-left:4px solid var(--primary); }
+        .quiz-progress { height:.5rem; background-color:var(--border); border-radius:9999px; margin-bottom:1rem; overflow:hidden; }
+        .quiz-progress-bar { height:100%; background-color:var(--primary); width:0%; transition:width .3s ease; }
+        .quiz-result { text-align:center; padding:2rem; display:none; border-top:1px solid var(--border); margin-top:1.5rem; }
+        .quiz-score { font-size:2rem; font-weight:bold; margin-bottom:1rem; }
+        .checkbox-label { display:flex; align-items:center; cursor:pointer; margin-bottom:0.5rem; }
+        .checkbox { appearance:none; width:1rem; height:1rem; border:1px solid var(--border); border-radius:.25rem; margin-right:.5rem; position:relative; cursor:pointer; }
+        .checkbox:checked { background-color:var(--primary); border-color:var(--primary); }
+        .checkbox:checked::after { content:''; position:absolute; left:5px; top:2px; width:3px; height:7px; border:solid white; border-width:0 2px 2px 0; transform:rotate(45deg); }
+        .hidden { display: none !important; }
+        button { padding: .5rem 1rem; border-radius: .5rem; border: 1px solid #ccc; cursor: pointer; }
+        button.primary { background-color: var(--primary); color: white; }
+        @media print { body, html { background-color: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } body.modal-open { overflow: auto !important; } body.modal-open .container { opacity: 1 !important; filter: none !important; pointer-events: auto !important; } .tabs, .module-header .module-toggle, .quiz-modal, button:not(.print-report-btn):not(.export-report-btn-text), input[type="text"], .card-footer:not(.report-footer) { display: none !important; } #content-tab { display: none !important; } #progress-tab { display: block !important; } .container { max-width: 100% !important; padding: 0 !important; margin: 1cm !important; } .card { border: none !important; box-shadow: none !important; margin-bottom: 1rem !important; page-break-inside: avoid !important; } .card-header { background-color: transparent !important; padding: 0 0 0.5rem 0 !important; border-bottom: 1px solid #ccc !important; } .card-content { padding: 0.5rem 0 !important; } h2 { font-size: 1.5rem !important; margin-top: 1rem !important; } h3 { font-size: 1.2rem !important; margin-top: 0.5rem !important; } .progress-bar { border: 1px solid #ccc !important; background-color: #eee !important; height: 1rem !important; } .progress-bar-fill { background-color: #999 !important; } .module-progress { border: 1px solid #eee !important; padding: 0.5rem !important; } #student-name-print { display: block; margin-bottom: 1rem; font-weight: bold; } * { color: #000 !important; } }
+    </style></head>
+<body>
+  <div class="container">
+    <h1>Cell Structure and Cell Theory</h1>
+    <p class="course-description">A comprehensive introduction to cell structure, the unified cell theory, and the diversity of cells. This course explores the historical context of cell biology, cell specialization, hierarchical organization in multicellular organisms, and the techniques used to study cells.</p>
+    <div class="tabs">
+      <div class="tab active" data-tab="content">Course Content</div>
+      <div class="tab" data-tab="progress">Your Progress</div>
+    </div>
+    <div class="tab-content active" id="content-tab">
+      <div class="learning-objectives"><h3>Learning Objectives</h3><ul><li>Define a cell and explain the unified cell theory.</li><li>Describe the historical development of cell biology.</li><li>Compare and contrast prokaryotic and eukaryotic cells.</li><li>Explain the structure and function of major cellular organelles.</li><li>Describe the principles of light and electron microscopy.</li><li>Understand the relationship between cell size, surface area, and volume.</li><li>Explain the endosymbiotic theory.</li><li>Describe the endomembrane system and its role in protein and lipid trafficking.</li><li>Describe the structure and function of the cytoskeleton.</li><li>Explain different types of cell junctions and their roles in intercellular communication.</li><li>Understand the role of the extracellular matrix in cell communication.</li></ul></div>
+      <h2>Modules</h2>
+      
+        <div class="module" data-module-id="0">
+          <div class="module-header"><h4>1. Introduction to Cell Biology</h4><span class="module-toggle">▼</span></div>
+          <div class="module-content" id="module-0-content">
+            <p>This module provides a foundational understanding of cells as the basic units of life and introduces the unified cell theory.</p>
+            
+              <div class="lesson" id="lesson-0-0">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">1.1</span>What is a Cell?</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="0" data-lesson-id="0" onchange="toggleLessonCompletion(0, 0, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">A cell is the fundamental unit of life, the smallest structural and functional component of all living organisms.  From the simplest bacterium to the most complex whale, all life is built upon this foundational element.  Nothing smaller than a cell can be considered alive; it's the minimum requirement for independent existence.  Think of cells as the microscopic building blocks that construct the intricate organisms we observe in the world, from towering redwoods to microscopic algae. Cytology, the scientific study of cells, is a cornerstone of biology, providing crucial insights into the very mechanisms that drive life.  Understanding cells unlocks a deeper understanding of how life functions at its most basic level.<br><br>The sheer scale of cellular organization is astonishing.  Cells are incredibly small, generally microscopic, requiring powerful magnification—like microscopes—for visualization. A typical human cell, for example, might range from 10 to 100 micrometers in diameter; to put this in perspective, that's roughly 1/100th of a millimeter. Hundreds of human cells could easily fit across the width of a single human hair. Despite their minuscule size, cells are remarkably complex, performing a multitude of functions.  These functions are diverse and vary depending on the cell type and organism, but all cells share certain fundamental characteristics.  Every cell is enveloped by a selectively permeable plasma membrane, acting as a barrier separating the cell's internal environment from its surroundings. This membrane meticulously controls the passage of substances into and out of the cell, a vital process for maintaining the cell's internal equilibrium, a state called homeostasis.  Crucially, all cells contain DNA—deoxyribonucleic acid—the genetic blueprint that dictates the cell's structure, function, and reproduction. This DNA is faithfully replicated and passed down through generations of cells, ensuring the continuity of life.  Ribosomes, cellular structures responsible for protein synthesis, are also universal to all cells. Proteins are the workhorses of the cell, essential for virtually every cellular process, from catalyzing reactions to providing structural support.<br><br>Cellular organization exhibits a vast range of complexity.  Some organisms, such as bacteria and amoebas, are unicellular—their entire body consists of a single cell.  This single cell performs all necessary life functions, from nutrient acquisition to reproduction. In contrast, multicellular organisms, including plants, animals, and fungi, are composed of countless cells, often trillions, each specialized for specific tasks.  These cells demonstrate remarkable cooperation, working together in a highly coordinated manner to maintain the overall health and function of the organism.  The human body, for instance, is a testament to this cellular collaboration. We possess muscle cells for movement, nerve cells for rapid communication, blood cells for oxygen transport, and many more cell types, each performing a unique role.  Cells are organized into tissues, which in turn form organs, and finally, organ systems. This hierarchical structure, from individual cells to complex organ systems, highlights the incredible complexity and efficiency of multicellular life.  The study of cell interactions and cooperation within these larger structures is a significant focus of cell biology, providing insights into the functioning of complex organisms.</div>
+                <div><h6>Activities</h6><ul><li>Label a diagram of a generalized cell.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>OpenStax Biology, Chapter 4: A Tour of the Cell</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(0, 0)">Take Quiz</button>
+              </div>
+              <div class="lesson" id="lesson-0-1">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">1.2</span>The Unified Cell Theory</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="0" data-lesson-id="1" onchange="toggleLessonCompletion(0, 1, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">The unified cell theory, a cornerstone of modern biology, rests on three fundamental tenets that, when taken together, provide a comprehensive understanding of life's fundamental unit.  The first tenet states that all living organisms are composed of one or more cells. This seemingly simple statement has profound implications, unifying all life forms from the simplest bacteria to the most complex multicellular organisms like humans.  Consider, for instance, a towering redwood tree: its immense size and complex structure are ultimately built from the coordinated actions of countless individual cells.  Similarly, the human body, with its trillions of cells, is a testament to the power of cellular organization.  Each cell, regardless of its specialized function – whether it's a neuron transmitting electrical signals or a muscle cell contracting to produce movement – contributes to the overall functioning of the organism.<br><br>The second tenet asserts that the cell is the basic unit of structure and organization in organisms.  This emphasizes not just the cellular composition of life, but also the functional significance of the individual cell.  Cells are not merely building blocks; they are the smallest units capable of carrying out all the essential processes of life, including metabolism, reproduction, and response to stimuli.  Think of a single-celled amoeba, a simple organism that independently performs all life functions. Its entire existence is contained within the boundaries of a single cell, showcasing the cell's self-sufficiency. Even in complex multicellular organisms, individual cells maintain a degree of autonomy while working in concert with others.  Specialized cells, such as those forming the lining of the digestive tract or the photoreceptor cells in the retina, exhibit unique structures and functions tailored to their specific roles, yet they remain fundamentally cellular in their nature.<br><br>The third and final tenet states that all cells come from pre-existing cells.  This principle refutes the idea of spontaneous generation, a long-held belief that life could arise spontaneously from non-living matter. Instead, it establishes a lineage of continuous cellular replication, tracing life's history back through generations of cells.  This tenet is crucial for understanding both cellular reproduction and the transmission of genetic information.  Cell division, whether through mitosis (for somatic cells) or meiosis (for gametes), ensures the faithful passage of genetic material from one generation of cells to the next.  The processes of DNA replication and chromosome segregation are paramount to this continuity, ensuring the fidelity of genetic information and the propagation of life.  The universality of this principle, applicable to all known life, reinforces the fundamental unity of life on Earth.  The implication is that all cells, regardless of their diversity, share a common ancestor, a testament to the interconnectedness of all living things.</div>
+                <div><h6>Activities</h6><ul><li>Discuss the contributions of key scientists to the development of cell theory.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>Relevant journal articles on the history of cell biology</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(0, 1)">Take Quiz</button>
+              </div>
+              <div class="lesson" id="lesson-0-2">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">1.3</span>Cell Diversity and Commonality</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="0" data-lesson-id="2" onchange="toggleLessonCompletion(0, 2, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">Cells, the fundamental units of life, exhibit remarkable diversity in structure and function, yet share underlying commonalities reflecting their shared evolutionary ancestry.  A primary division within the cellular world separates prokaryotic cells from eukaryotic cells. Prokaryotic cells, exemplified by bacteria and archaea, are simpler in structure, lacking a membrane-bound nucleus and other membrane-enclosed organelles. Their genetic material, a single circular chromosome, resides in a region called the nucleoid.  In contrast, eukaryotic cells, found in protists, fungi, plants, and animals, are significantly more complex. They possess a true nucleus, housing their linear chromosomes, and a variety of membrane-bound organelles, each specialized for a specific cellular function.  These organelles include the mitochondria, responsible for energy production; the endoplasmic reticulum, involved in protein and lipid synthesis; the Golgi apparatus, modifying and packaging proteins; and lysosomes, which break down waste materials.  Plant cells further distinguish themselves through the presence of a cell wall providing structural support and chloroplasts, the sites of photosynthesis.<br><br>Despite these structural differences, both prokaryotic and eukaryotic cells share several fundamental characteristics.  Both cell types are enclosed by a plasma membrane, a selectively permeable barrier regulating the passage of substances into and out of the cell.  The cytoplasm, the region within the plasma membrane, contains the cytosol, a gel-like substance, and various cellular components.  Both cell types utilize ribosomes, though differing in size and composition, for protein synthesis.  Furthermore, both cell types possess a genetic blueprint encoded in DNA, although the organization and packaging of DNA differ significantly.  Prokaryotes use simpler mechanisms for DNA replication and gene regulation compared to the more complex systems found in eukaryotes.  Finally, both cell types use similar basic metabolic pathways for energy generation and nutrient processing, although specific enzymes and mechanisms may vary. Understanding these shared features and distinct characteristics is crucial for comprehending the vast spectrum of cellular life and the evolutionary relationships between different organisms.  The variations in cell structure directly reflect the diverse functions cells perform within their respective organisms, illustrating the elegant interplay between form and function at the cellular level.  For instance, the elongated shape of nerve cells facilitates long-distance signaling, while the spherical shape of many immune cells allows for efficient movement and engulfment of foreign particles.</div>
+                <div><h6>Activities</h6><ul><li>Compare and contrast prokaryotic and eukaryotic cells using a Venn diagram.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>OpenStax Biology, Chapter 4: A Tour of the Cell</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(0, 2)">Take Quiz</button>
+              </div>
+          </div>
+        </div>
+        <div class="module" data-module-id="1">
+          <div class="module-header"><h4>2. Microscopy and Cell Visualization</h4><span class="module-toggle">▼</span></div>
+          <div class="module-content" id="module-1-content">
+            <p>This module explores the techniques used to visualize cells, including light and electron microscopy.</p>
+            
+              <div class="lesson" id="lesson-1-0">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">2.1</span>Light Microscopy</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="1" data-lesson-id="0" onchange="toggleLessonCompletion(1, 0, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">Light microscopy, a cornerstone of biological research and numerous other scientific fields, relies on the principles of visible light to visualize specimens.  Understanding these principles is crucial to effectively using this technique.  Light passes through a condenser lens, focusing the beam onto the specimen.  The light then interacts with the specimen;  some light is absorbed, some is scattered, and some passes through. The light that passes through the specimen then travels through the objective lens, which magnifies the image.  This magnified image is further magnified by the ocular lens (eyepiece), resulting in the final image observed by the user. The total magnification is calculated by multiplying the magnification of the objective lens by the magnification of the ocular lens. For example, a 10x ocular lens and a 40x objective lens will yield a 400x total magnification.  Different objective lenses provide varying levels of magnification and numerical aperture (NA), a measure of the lens' ability to gather light and resolve fine details. Higher NA objective lenses allow for better resolution, meaning the ability to distinguish between two closely spaced objects.<br><br>However, light microscopy has inherent limitations.  The resolution is limited by the wavelength of visible light, typically around 200 nanometers. This means that structures smaller than this cannot be effectively resolved, even with high magnification.  Another limitation is the depth of field, which refers to the thickness of the specimen that is in sharp focus at any given time.  Thicker specimens may appear blurry because only a thin section is in focus.  Furthermore, the contrast between different parts of the specimen can be low, making it difficult to visualize certain structures. Techniques like staining are employed to enhance contrast, using dyes that selectively bind to specific cellular components, improving visibility.  Examples include hematoxylin and eosin (H&E) staining for tissue samples, or Gram staining for bacteria.<br><br>Despite its limitations, light microscopy remains a widely used and valuable tool.  Its applications are incredibly diverse.  In biology, it's used to observe living cells and their dynamic processes, such as cell division, movement, and interactions.  Pathologists use light microscopy extensively to diagnose diseases by examining tissue samples.  In materials science, it can be used to analyze the microstructure of materials.  Different types of light microscopy exist, each with its own advantages and applications.  Phase-contrast microscopy, for example, enhances contrast in transparent specimens by exploiting differences in refractive index.  Fluorescence microscopy utilizes fluorescent dyes or proteins to visualize specific molecules or structures within cells, offering high specificity and sensitivity.  Confocal microscopy further refines fluorescence microscopy by using a pinhole to eliminate out-of-focus light, resulting in sharper, higher-resolution images of thicker specimens.  The choice of microscopy technique depends heavily on the specific research question and the nature of the specimen being studied.</div>
+                <div><h6>Activities</h6><ul><li>Observe prepared slides under a light microscope.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>Laboratory manual on microscopy techniques</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(1, 0)">Take Quiz</button>
+              </div>
+              <div class="lesson" id="lesson-1-1">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">2.2</span>Electron Microscopy</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="1" data-lesson-id="1" onchange="toggleLessonCompletion(1, 1, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">Electron microscopy, a powerful technique offering significantly higher resolution than light microscopy, relies on a beam of electrons to illuminate a specimen, rather than photons.  This fundamental difference allows for visualization of structures at the nanometer scale, revealing details invisible to conventional light microscopes.  There are two primary types: scanning electron microscopy (SEM) and transmission electron microscopy (TEM), each with unique principles and applications.<br><br>SEM works by rastering a focused electron beam across the surface of a sample.  As the electrons interact with the sample's surface, they cause the emission of secondary electrons, backscattered electrons, and characteristic X-rays.  These signals are detected and used to generate a three-dimensional image of the sample's topography and surface composition. For example, SEM is frequently used to examine the surface structures of pollen grains, revealing intricate patterns and textures. The high resolution allows for detailed analysis of surface features like pores, ridges, and spines.  Its advantages include its relatively simple sample preparation and the generation of high-resolution images showing surface detail. However, SEM has limitations; it only provides information about the surface of the sample, and the imaging process can potentially damage or alter delicate samples.<br><br>TEM, on the other hand, utilizes a beam of electrons that is transmitted through a very thin specimen.  The electrons interact with the sample's internal structure, and the resulting transmitted electrons are used to create an image.  Areas of high electron density, such as heavy metal stains, appear darker in the image, while areas of low density appear brighter.  This allows visualization of internal cellular structures like organelles and macromolecular complexes.  For instance, TEM is invaluable for studying the ultrastructure of viruses, revealing their capsid structure and internal components.  The high resolution of TEM enables visualization of individual proteins within cellular structures, providing crucial insights into their organization and function.  While TEM provides unparalleled resolution for visualizing internal structures, it requires extensive sample preparation, including ultra-thin sectioning, often involving embedding the sample in resin and staining with heavy metals.  This process can introduce artifacts and may not be suitable for all types of samples.  Furthermore, TEM images are typically two-dimensional projections of a three-dimensional structure, requiring sophisticated image processing techniques for accurate interpretation.  Both SEM and TEM, therefore, present unique advantages and disadvantages, making the choice of technique dependent on the specific research question and the nature of the sample being studied.</div>
+                <div><h6>Activities</h6><ul><li>Analyze electron micrographs of different cell types.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>Online resources with electron micrographs</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(1, 1)">Take Quiz</button>
+              </div>
+          </div>
+        </div>
+        <div class="module" data-module-id="2">
+          <div class="module-header"><h4>3. Prokaryotic vs. Eukaryotic Cells</h4><span class="module-toggle">▼</span></div>
+          <div class="module-content" id="module-2-content">
+            <p>A detailed comparison of prokaryotic and eukaryotic cells, focusing on their structural differences and functional implications.</p>
+            
+              <div class="lesson" id="lesson-2-0">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">3.1</span>Prokaryotic Cell Structure</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="2" data-lesson-id="0" onchange="toggleLessonCompletion(2, 0, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">Prokaryotic cells, the fundamental units of bacteria and archaea, are structurally simpler than eukaryotic cells but exhibit remarkable diversity in their adaptations to various environments.  A detailed examination of their components reveals a surprisingly intricate organization, despite the absence of membrane-bound organelles.  The defining feature is the lack of a nucleus; their genetic material, a single circular chromosome, resides in a region called the nucleoid.  This area isn't enclosed by a membrane, unlike the nucleus in eukaryotic cells.  The nucleoid is often associated with proteins that help organize and compact the DNA.  Beyond the chromosome, many prokaryotes also possess smaller, circular DNA molecules called plasmids. These plasmids often carry genes conferring advantageous traits such as antibiotic resistance or the ability to utilize specific nutrients, and can be transferred between cells.<br><br>The cytoplasm, the gel-like substance filling the cell, is teeming with ribosomes, responsible for protein synthesis. Prokaryotic ribosomes are smaller (70S) than those found in eukaryotes (80S), a difference exploited by some antibiotics that target bacterial ribosomes without affecting human cells.  Embedded within the cytoplasm are various enzymes and metabolic pathways crucial for energy production and biosynthesis.  Many prokaryotes also possess inclusion bodies, storage compartments for nutrients like glycogen or polyphosphate granules, providing a reserve for times of scarcity.  These inclusions can vary greatly depending on the species and environmental conditions.  For example, cyanobacteria, photosynthetic bacteria, possess specialized inclusion bodies containing gas vesicles that regulate buoyancy in aquatic environments.<br><br>The cell membrane, a selectively permeable barrier, controls the passage of substances into and out of the cell.  It's composed of a phospholipid bilayer similar to eukaryotic cell membranes but often lacks sterols, a component that provides rigidity in eukaryotic membranes.  Many prokaryotes have a cell wall external to the cell membrane, providing structural support and protection.  Bacterial cell walls are primarily composed of peptidoglycan, a unique polymer of sugars and amino acids.  The Gram-staining technique differentiates bacteria based on their cell wall structure; Gram-positive bacteria have a thick peptidoglycan layer, while Gram-negative bacteria have a thinner layer and an outer membrane containing lipopolysaccharide (LPS), a potent endotoxin. Archaea, on the other hand, have cell walls composed of various other materials, like pseudomurein, showcasing their distinct evolutionary lineage.<br><br>Many prokaryotes also possess external structures like flagella, long whip-like appendages used for motility, enabling them to navigate towards nutrients or away from harmful substances.  Pili, shorter and thinner than flagella, are involved in attachment to surfaces or in conjugation, a process of genetic exchange between bacterial cells.  A capsule, a sticky outer layer composed of polysaccharides or proteins, surrounds some prokaryotes, contributing to their virulence by protecting them from host immune responses or facilitating adhesion to surfaces.  The diverse array of structures and adaptations found in prokaryotic cells highlights their remarkable adaptability and ecological significance.</div>
+                <div><h6>Activities</h6><ul><li>Draw and label a prokaryotic cell.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>OpenStax Biology, Chapter 4: A Tour of the Cell</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(2, 0)">Take Quiz</button>
+              </div>
+              <div class="lesson" id="lesson-2-1">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">3.2</span>Eukaryotic Cell Structure</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="2" data-lesson-id="1" onchange="toggleLessonCompletion(2, 1, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">This lesson delves into the intricate world of eukaryotic cells, exploring their diverse components and their specific roles in maintaining cellular function. We will examine the key organelles found within these cells, highlighting their structural features and the vital processes they facilitate.  A central theme will be the comparison of animal and plant cells, revealing both their shared characteristics and their significant differences.  We will begin by examining the nucleus, the control center of the eukaryotic cell, housing the cell's genetic material—DNA—organized into chromosomes.  The nucleus is enclosed by a double membrane called the nuclear envelope, punctuated by nuclear pores that regulate the transport of molecules between the nucleus and the cytoplasm.  The nucleolus, a dense region within the nucleus, is responsible for ribosome biogenesis.  Moving outward, we encounter the endoplasmic reticulum (ER), a network of interconnected membranes extending throughout the cytoplasm.  The rough ER, studded with ribosomes, plays a crucial role in protein synthesis and modification, while the smooth ER synthesizes lipids and detoxifies harmful substances.  The Golgi apparatus, or Golgi complex, receives proteins and lipids from the ER, further processes, sorts, and packages them into vesicles for transport to their final destinations within or outside the cell.  Lysosomes, membrane-bound organelles containing digestive enzymes, break down waste materials, cellular debris, and ingested substances.  Mitochondria, the powerhouses of the cell, are responsible for cellular respiration, generating ATP—the cell's main energy currency.  They possess their own DNA and ribosomes, remnants of their endosymbiotic origin.  Plant cells, in addition to these organelles, possess several unique structures.  The most prominent is the large central vacuole, which maintains turgor pressure, stores water and nutrients, and plays a role in waste disposal.  Chloroplasts, the sites of photosynthesis, contain chlorophyll and other pigments that capture light energy to convert carbon dioxide and water into glucose.  Their double membrane structure and the presence of their own DNA and ribosomes further support the endosymbiotic theory.  The rigid cell wall, composed primarily of cellulose, provides structural support and protection to the plant cell.  Finally, plasmodesmata, channels that connect adjacent plant cells, facilitate communication and transport between them.  In contrast, animal cells lack a cell wall, a large central vacuole, and chloroplasts.  However, they may contain other specialized structures, such as cilia and flagella for motility, and centrioles, which play a role in cell division.  Understanding the structure and function of these organelles is crucial to grasping the complexities of eukaryotic cell biology and the diverse roles these cells play in multicellular organisms.</div>
+                <div><h6>Activities</h6><ul><li>Draw and label an animal and a plant cell.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>OpenStax Biology, Chapter 4: A Tour of the Cell</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(2, 1)">Take Quiz</button>
+              </div>
+              <div class="lesson" id="lesson-2-2">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">3.3</span>Endosymbiotic Theory</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="2" data-lesson-id="2" onchange="toggleLessonCompletion(2, 2, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">The endosymbiotic theory proposes that eukaryotic cells evolved from a symbiotic relationship between different prokaryotic organisms.  This revolutionary idea explains the origin of mitochondria and chloroplasts, two key organelles within eukaryotic cells.  The theory suggests that a larger host prokaryote engulfed a smaller prokaryote, rather than digesting it, initiating a symbiotic relationship.  Over time, this relationship became mutually beneficial, with the smaller prokaryote eventually evolving into an organelle within the larger cell.<br><br>Several key pieces of evidence strongly support the endosymbiotic theory.  Firstly, mitochondria and chloroplasts possess their own circular DNA, separate from the cell's nuclear DNA. This is reminiscent of the genetic material found in prokaryotes.  Secondly, both organelles have their own ribosomes, which are smaller and more similar to prokaryotic ribosomes than to the eukaryotic ribosomes found in the cytoplasm. This suggests an independent protein synthesis mechanism within these organelles.  Thirdly, the double membrane structure of mitochondria and chloroplasts provides further evidence.  The inner membrane is believed to be the original membrane of the engulfed prokaryote, while the outer membrane is thought to be derived from the host cell's membrane during the engulfment process.  Fourthly, the replication process of mitochondria and chloroplasts is similar to binary fission, a form of asexual reproduction seen in prokaryotes, rather than the mitotic division seen in the eukaryotic cell itself.  This independent replication further supports their independent origins.  Finally, the size and shape of mitochondria and chloroplasts are comparable to those of certain free-living bacteria, strengthening the link to prokaryotic ancestry.  For example, the size and morphology of mitochondria closely resemble alpha-proteobacteria, suggesting a strong evolutionary relationship.  Similarly, chloroplasts show striking similarities to cyanobacteria, hinting at their origin as photosynthetic prokaryotes.  These independent lines of evidence, taken together, provide a compelling case for the endosymbiotic origin of these crucial eukaryotic organelles.  The endosymbiotic theory is not just a historical event; it's a continuing process, with new research continuously refining our understanding of this critical evolutionary step.  The ongoing study of genomes, including those of both eukaryotic and prokaryotic organisms, continues to provide fresh insights into this intricate evolutionary relationship and the development of the complex eukaryotic cell.</div>
+                <div><h6>Activities</h6><ul><li>Discuss the evidence for the endosymbiotic theory.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>Relevant scientific articles on endosymbiosis</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(2, 2)">Take Quiz</button>
+              </div>
+          </div>
+        </div>
+        <div class="module" data-module-id="3">
+          <div class="module-header"><h4>4. Cellular Organelles and Communication</h4><span class="module-toggle">▼</span></div>
+          <div class="module-content" id="module-3-content">
+            <p>This module explores the structure and function of major cellular organelles and mechanisms of intercellular communication.</p>
+            
+              <div class="lesson" id="lesson-3-0">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">4.1</span>The Endomembrane System</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="3" data-lesson-id="0" onchange="toggleLessonCompletion(3, 0, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">The endomembrane system is a dynamic network of interconnected organelles working together in eukaryotic cells.  Its primary function is the synthesis, modification, and transport of lipids and proteins. This intricate system isn't just a collection of individual components; it's a highly coordinated assembly line, ensuring molecules reach their correct destinations within the cell or are secreted outside.  Central to this system are several key organelles: the endoplasmic reticulum (ER), Golgi apparatus, lysosomes, and vacuoles.  The precise movement of materials between these organelles depends on vesicle trafficking—small membrane-bound sacs that bud off from one organelle and fuse with another, carrying their cargo along the way.<br><br>The endoplasmic reticulum, a vast network of interconnected membranes, is divided into two main regions: the rough ER and the smooth ER.  The rough ER, studded with ribosomes, is the primary site of protein synthesis for many secreted proteins and membrane-bound proteins.  Ribosomes translate mRNA into polypeptide chains, which are then folded and modified within the rough ER lumen.  This modification often includes glycosylation, the addition of sugar chains, which is crucial for protein function and targeting.  The smooth ER, lacking ribosomes, plays a significant role in lipid synthesis, including phospholipids and steroids. It also participates in detoxification processes, particularly in liver cells, breaking down harmful substances.<br><br>From the ER, proteins and lipids are transported to the Golgi apparatus, a stack of flattened, membrane-bound sacs called cisternae.  Here, the molecules undergo further processing and sorting.  The Golgi apparatus acts as a processing and packaging center, modifying molecules, adding further carbohydrates, and sorting them into different vesicles based on their final destination.  This sorting involves specific signals within the molecules themselves, directing them to lysosomes, the plasma membrane, or other organelles.<br><br>Lysosomes are membrane-bound organelles containing hydrolytic enzymes capable of breaking down a wide range of macromolecules, including proteins, nucleic acids, carbohydrates, and lipids. These enzymes function best in an acidic environment, maintained by a proton pump within the lysosomal membrane. Lysosomes are crucial for waste recycling within the cell, digesting materials taken in by endocytosis, and breaking down worn-out organelles through autophagy.  Vacuoles, particularly prominent in plant cells, perform similar functions to lysosomes, but also play a crucial role in storing water, nutrients, and waste products.  They contribute significantly to maintaining turgor pressure in plant cells.<br><br>The entire process, from protein synthesis in the rough ER to secretion from the cell or delivery to other organelles, is a complex and regulated process involving various protein coats that help form and target vesicles, motor proteins that transport them along cytoskeletal tracks, and specific fusion machinery to ensure vesicle delivery to the correct target membrane.  Understanding the endomembrane system is fundamental to comprehending cellular function and the intricate processes that maintain cellular homeostasis.  Disruptions in this system can lead to various cellular malfunctions and diseases.</div>
+                <div><h6>Activities</h6><ul><li>Trace the path of a protein through the endomembrane system.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>OpenStax Biology, Chapter 4: A Tour of the Cell</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(3, 0)">Take Quiz</button>
+              </div>
+              <div class="lesson" id="lesson-3-1">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">4.2</span>The Cytoskeleton</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="3" data-lesson-id="1" onchange="toggleLessonCompletion(3, 1, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">The cytoskeleton, a complex and dynamic network of protein filaments, is crucial for maintaining cell shape, facilitating intracellular transport, enabling cell motility, and orchestrating cell division.  It's not a static structure but rather a constantly rearranging framework that responds to cellular needs.  Think of it as the cell's internal scaffolding, providing both structural support and a system of roadways for moving cargo.  This intricate network is composed of three major types of protein filaments: microtubules, microfilaments (also known as actin filaments), and intermediate filaments.<br><br>Microtubules, the thickest of the three, are hollow tubes made of the protein tubulin.  They are responsible for a variety of cellular processes, including the separation of chromosomes during cell division.  They form the mitotic spindle, which pulls duplicated chromosomes apart, ensuring each daughter cell receives a complete set of genetic material.  Microtubules also serve as tracks for motor proteins, such as kinesin and dynein, which transport organelles and vesicles throughout the cell.  Imagine these motor proteins as tiny trucks carrying packages along the microtubule highways.  Cilia and flagella, hair-like appendages found on the surface of some cells, are also built from microtubules arranged in a characteristic 9+2 pattern. Cilia beat rhythmically to move fluids across cell surfaces, as seen in the lining of the respiratory tract, while flagella propel entire cells, like sperm cells.<br><br>Microfilaments, made of the protein actin, are thinner and more flexible than microtubules. They are primarily involved in cell shape, movement, and cytokinesis, the division of the cytoplasm during cell division.  Actin filaments form a dense network just beneath the cell membrane, contributing significantly to cell shape and cortical tension.  They also play a critical role in cell locomotion, forming structures like lamellipodia and filopodia, which extend outward to explore the environment and allow the cell to crawl.  Muscle contraction relies heavily on the interaction of actin filaments with myosin motor proteins.  The coordinated sliding of these filaments generates the force needed for muscle movement.<br><br>Intermediate filaments, as their name suggests, are intermediate in size between microtubules and microfilaments.  They are composed of a diverse array of proteins, varying depending on cell type.  Their primary function is to provide mechanical strength and support to the cell, anchoring organelles and resisting tension.  They form a strong, durable scaffold within the cell, contributing to its structural integrity and resilience.  Examples include keratin filaments in epithelial cells, which strengthen the skin and other epithelial tissues, and neurofilaments in neurons, which provide structural support for the long axons of nerve cells.  Unlike microtubules and microfilaments, intermediate filaments are generally not involved in dynamic processes like intracellular transport or cell motility.  They primarily serve a structural role, contributing to overall cell stability.  The diverse nature of intermediate filaments highlights the specialized adaptations found within different cell types.</div>
+                <div><h6>Activities</h6><ul><li>Compare and contrast the three types of cytoskeletal filaments.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>OpenStax Biology, Chapter 4: A Tour of the Cell</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(3, 1)">Take Quiz</button>
+              </div>
+              <div class="lesson" id="lesson-3-2">
+                <div class="lesson-header">
+                    <h5 class="lesson-title"><span class="lesson-number">4.3</span>Cell Communication</h5>
+                    <label class="checkbox-label"><input type="checkbox" class="lesson-checkbox" data-module-id="3" data-lesson-id="2" onchange="toggleLessonCompletion(3, 2, this)"> Mark completed</label>
+                </div>
+                <div class="lesson-content">Cell communication is crucial for multicellular organisms, relying heavily on direct connections between cells and the extracellular environment.  Intercellular junctions are specialized structures that facilitate communication and adhesion between adjacent cells.  These junctions are not merely static connectors; they dynamically regulate the passage of molecules and signals, contributing significantly to tissue integrity and function.  There are several major types of intercellular junctions, each with a unique role.  Tight junctions, for example, form a nearly impermeable seal between cells, preventing the passage of substances between them. This is vital in tissues like the lining of the digestive tract, where it prevents the leakage of harmful substances into the bloodstream.  Gap junctions, conversely, create channels that directly connect the cytoplasm of adjacent cells, allowing for the rapid exchange of ions and small molecules.  This is critical in tissues requiring coordinated activity, such as cardiac muscle, where synchronized contractions are essential.  Adherens junctions and desmosomes provide strong mechanical attachments, holding cells together and contributing to the structural integrity of tissues.  Adherens junctions utilize cadherin proteins to link the actin cytoskeletons of adjacent cells, while desmosomes connect intermediate filaments, providing even greater strength.  The specific types and abundance of junctions vary significantly depending on the tissue type and its functional requirements.  For instance, epithelial tissues, which form linings and coverings, typically exhibit a rich array of junctions, whereas connective tissues may rely more on the extracellular matrix for structural support.<br><br>The extracellular matrix (ECM) is a complex network of proteins and polysaccharides that surrounds cells, providing structural support, influencing cell behavior, and mediating intercellular communication.  The major components of the ECM include collagen, elastin, and various proteoglycans.  Collagen fibers provide tensile strength, resisting stretching forces, while elastin fibers allow tissues to stretch and recoil.  Proteoglycans, with their highly hydrated structure, contribute to the compression resistance of the ECM.  The ECM is not merely a passive scaffold; it actively participates in cell signaling.  Integrins, transmembrane receptors, connect the ECM to the intracellular cytoskeleton, transmitting signals bidirectionally.  Changes in the ECM composition can trigger intracellular signaling pathways, influencing cell growth, differentiation, and migration.  For example, the stiffness of the ECM can affect cell shape and gene expression.  A stiffer ECM, such as that found in cancerous tissues, might promote uncontrolled cell growth and metastasis.  Conversely, a more compliant ECM might encourage cell differentiation and tissue repair.  The intricate interplay between cells and the ECM highlights the dynamic nature of cell communication and its crucial role in tissue homeostasis and disease. The ECM's role in cell communication is further emphasized by the presence of signaling molecules embedded within it, allowing for both local and long-range signaling events to occur.</div>
+                <div><h6>Activities</h6><ul><li>Compare and contrast different types of cell junctions.</li></ul></div>
+                <div><h6>Resources</h6><ul><li>OpenStax Biology, Chapter 4: A Tour of the Cell</li></ul></div>
+                <button class="take-quiz-button" onclick="startQuiz(3, 2)">Take Quiz</button>
+              </div>
+          </div>
+        </div>
+    </div>
+    <div class="tab-content" id="progress-tab">
+        <div class="card progress-card" id="overall-progress-card"> <div class="card-header"><h2>Overall Progress</h2></div>
+            <div class="card-content">
+                <div id="student-name-print" style="display: none; font-weight: bold; margin-bottom: 1rem;"></div>
+                <div><div class="flex justify-between"><span>Course Completion</span><span id="overall-progress-percentage">0%</span></div><div class="progress-bar"><div class="progress-bar-fill" id="overall-progress-bar" style="width: 0%"></div></div></div>
+                <div style="margin-top: 2rem;"><h3>Completed Lessons</h3><div style="display: flex; align-items: baseline; margin-top: 0.5rem;"><div style="font-size: 1.5rem; font-weight: bold;" id="completed-lessons-count">0</div><div style="margin-left: 0.5rem; color:var(--muted-foreground);">/ <span id="total-lessons-count">0</span> lessons</div></div></div>
+                <div style="margin-top: 2rem;"><h3>Average Quiz Score</h3><div style="display: flex; align-items: baseline; margin-top: 0.5rem;"><div style="font-size: 1.5rem; font-weight: bold;" id="average-quiz-score">0%</div><div style="margin-left: 0.5rem; color:var(--muted-foreground);">across <span id="completed-quizzes-count">0</span> quizzes</div></div></div>
+            </div>
+        </div>
+        <div class="card" id="module-progress-card"> <div class="card-header"><h2>Module Progress</h2></div><div class="card-content"><div id="module-progress-container"></div></div>
+            <div class="card-footer report-footer">
+                <label for="student-name-input" style="margin-right: 0.5rem;">Student Name:</label><input type="text" id="student-name-input" placeholder="Enter Name for Report" style="flex-grow:1; margin-bottom:0;">
+                <button class="print-report-btn" onclick="printProgressReport()">Print Report</button>
+                <button class="export-report-btn-text" onclick="exportProgressReportText()">Export Report (.txt)</button>
+            </div>
+        </div>
+    </div>
+  </div>
+  <div class="quiz-modal" id="quiz-modal">
+    <div class="quiz-modal-content">
+        <div class="quiz-modal-header"><h3 class="quiz-modal-title" id="quiz-modal-title">Quiz</h3><button class="quiz-modal-close-button" id="quiz-modal-close-button" title="Close Quiz">&times;</button></div>
+        <div class="quiz-modal-body" id="quiz-modal-body"></div>
+    </div>
+  </div>
+  <script>
+        const courseData = {"title":"Cell Structure and Cell Theory","description":"A comprehensive introduction to cell structure, the unified cell theory, and the diversity of cells. This course explores the historical context of cell biology, cell specialization, hierarchical organization in multicellular organisms, and the techniques used to study cells.","learningObjectives":["Define a cell and explain the unified cell theory.","Describe the historical development of cell biology.","Compare and contrast prokaryotic and eukaryotic cells.","Explain the structure and function of major cellular organelles.","Describe the principles of light and electron microscopy.","Understand the relationship between cell size, surface area, and volume.","Explain the endosymbiotic theory.","Describe the endomembrane system and its role in protein and lipid trafficking.","Describe the structure and function of the cytoskeleton.","Explain different types of cell junctions and their roles in intercellular communication.","Understand the role of the extracellular matrix in cell communication."],"modules":[{"title":"Introduction to Cell Biology","description":"This module provides a foundational understanding of cells as the basic units of life and introduces the unified cell theory.","lessons":[{"title":"What is a Cell?","content":"A cell is the fundamental unit of life, the smallest structural and functional component of all living organisms.  From the simplest bacterium to the most complex whale, all life is built upon this foundational element.  Nothing smaller than a cell can be considered alive; it's the minimum requirement for independent existence.  Think of cells as the microscopic building blocks that construct the intricate organisms we observe in the world, from towering redwoods to microscopic algae. Cytology, the scientific study of cells, is a cornerstone of biology, providing crucial insights into the very mechanisms that drive life.  Understanding cells unlocks a deeper understanding of how life functions at its most basic level.\n\nThe sheer scale of cellular organization is astonishing.  Cells are incredibly small, generally microscopic, requiring powerful magnification—like microscopes—for visualization. A typical human cell, for example, might range from 10 to 100 micrometers in diameter; to put this in perspective, that's roughly 1/100th of a millimeter. Hundreds of human cells could easily fit across the width of a single human hair. Despite their minuscule size, cells are remarkably complex, performing a multitude of functions.  These functions are diverse and vary depending on the cell type and organism, but all cells share certain fundamental characteristics.  Every cell is enveloped by a selectively permeable plasma membrane, acting as a barrier separating the cell's internal environment from its surroundings. This membrane meticulously controls the passage of substances into and out of the cell, a vital process for maintaining the cell's internal equilibrium, a state called homeostasis.  Crucially, all cells contain DNA—deoxyribonucleic acid—the genetic blueprint that dictates the cell's structure, function, and reproduction. This DNA is faithfully replicated and passed down through generations of cells, ensuring the continuity of life.  Ribosomes, cellular structures responsible for protein synthesis, are also universal to all cells. Proteins are the workhorses of the cell, essential for virtually every cellular process, from catalyzing reactions to providing structural support.\n\nCellular organization exhibits a vast range of complexity.  Some organisms, such as bacteria and amoebas, are unicellular—their entire body consists of a single cell.  This single cell performs all necessary life functions, from nutrient acquisition to reproduction. In contrast, multicellular organisms, including plants, animals, and fungi, are composed of countless cells, often trillions, each specialized for specific tasks.  These cells demonstrate remarkable cooperation, working together in a highly coordinated manner to maintain the overall health and function of the organism.  The human body, for instance, is a testament to this cellular collaboration. We possess muscle cells for movement, nerve cells for rapid communication, blood cells for oxygen transport, and many more cell types, each performing a unique role.  Cells are organized into tissues, which in turn form organs, and finally, organ systems. This hierarchical structure, from individual cells to complex organ systems, highlights the incredible complexity and efficiency of multicellular life.  The study of cell interactions and cooperation within these larger structures is a significant focus of cell biology, providing insights into the functioning of complex organisms.","activities":["Label a diagram of a generalized cell."],"resources":["OpenStax Biology, Chapter 4: A Tour of the Cell"],"quiz":{"title":"Quiz: What is a Cell?","questions":[{"question":"What is the fundamental unit of life?","options":["Cell","Organ","Tissue","Organ System"],"correctIndex":0,"explanation":"Cells are the basic building blocks of all living organisms."},{"question":"What is the minimum requirement for independent existence?","options":["Organelle","Atom","Molecule","Cell"],"correctIndex":3,"explanation":"Nothing smaller than a cell can be considered alive and self-sustaining."},{"question":"What is the scientific study of cells called?","options":["Histology","Anatomy","Cytology","Physiology"],"correctIndex":2,"explanation":"Cytology is the branch of biology that focuses on the structure and function of cells."},{"question":"What is a typical size range for a human cell?","options":["1-10 micrometers","10-100 micrometers","100-1000 micrometers","1-10 millimeters"],"correctIndex":1,"explanation":"Human cells are generally microscopic, ranging from 10 to 100 micrometers in diameter."}]}},{"title":"The Unified Cell Theory","content":"The unified cell theory, a cornerstone of modern biology, rests on three fundamental tenets that, when taken together, provide a comprehensive understanding of life's fundamental unit.  The first tenet states that all living organisms are composed of one or more cells. This seemingly simple statement has profound implications, unifying all life forms from the simplest bacteria to the most complex multicellular organisms like humans.  Consider, for instance, a towering redwood tree: its immense size and complex structure are ultimately built from the coordinated actions of countless individual cells.  Similarly, the human body, with its trillions of cells, is a testament to the power of cellular organization.  Each cell, regardless of its specialized function – whether it's a neuron transmitting electrical signals or a muscle cell contracting to produce movement – contributes to the overall functioning of the organism.\n\nThe second tenet asserts that the cell is the basic unit of structure and organization in organisms.  This emphasizes not just the cellular composition of life, but also the functional significance of the individual cell.  Cells are not merely building blocks; they are the smallest units capable of carrying out all the essential processes of life, including metabolism, reproduction, and response to stimuli.  Think of a single-celled amoeba, a simple organism that independently performs all life functions. Its entire existence is contained within the boundaries of a single cell, showcasing the cell's self-sufficiency. Even in complex multicellular organisms, individual cells maintain a degree of autonomy while working in concert with others.  Specialized cells, such as those forming the lining of the digestive tract or the photoreceptor cells in the retina, exhibit unique structures and functions tailored to their specific roles, yet they remain fundamentally cellular in their nature.\n\nThe third and final tenet states that all cells come from pre-existing cells.  This principle refutes the idea of spontaneous generation, a long-held belief that life could arise spontaneously from non-living matter. Instead, it establishes a lineage of continuous cellular replication, tracing life's history back through generations of cells.  This tenet is crucial for understanding both cellular reproduction and the transmission of genetic information.  Cell division, whether through mitosis (for somatic cells) or meiosis (for gametes), ensures the faithful passage of genetic material from one generation of cells to the next.  The processes of DNA replication and chromosome segregation are paramount to this continuity, ensuring the fidelity of genetic information and the propagation of life.  The universality of this principle, applicable to all known life, reinforces the fundamental unity of life on Earth.  The implication is that all cells, regardless of their diversity, share a common ancestor, a testament to the interconnectedness of all living things.","activities":["Discuss the contributions of key scientists to the development of cell theory."],"resources":["Relevant journal articles on the history of cell biology"],"quiz":{"title":"Quiz: The Unified Cell Theory","questions":[{"question":"Which of the following is NOT a tenet of the unified cell theory?","options":["All living organisms are composed of one or more cells.","Cells arise spontaneously from non-living matter.","The cell is the basic unit of structure and organization in organisms.","All cells come from pre-existing cells."],"correctIndex":1,"explanation":"Spontaneous generation of cells is a disproven theory.  All cells originate from pre-existing cells through cell division."},{"question":"What is the significance of the statement that 'all living organisms are composed of one or more cells'?","options":["It unites all life forms under a common principle.","It proves that all cells are identical.","It explains the origin of life.","It demonstrates that cells are always multicellular."],"correctIndex":0,"explanation":"This tenet establishes a fundamental unity among all living things, regardless of complexity."},{"question":"According to the unified cell theory, what is the smallest unit capable of carrying out all essential life processes?","options":["The cell","The organ","The tissue","The organ system"],"correctIndex":0,"explanation":"The cell is the fundamental unit of life, performing all necessary functions for survival and reproduction."}]}},{"title":"Cell Diversity and Commonality","content":"Cells, the fundamental units of life, exhibit remarkable diversity in structure and function, yet share underlying commonalities reflecting their shared evolutionary ancestry.  A primary division within the cellular world separates prokaryotic cells from eukaryotic cells. Prokaryotic cells, exemplified by bacteria and archaea, are simpler in structure, lacking a membrane-bound nucleus and other membrane-enclosed organelles. Their genetic material, a single circular chromosome, resides in a region called the nucleoid.  In contrast, eukaryotic cells, found in protists, fungi, plants, and animals, are significantly more complex. They possess a true nucleus, housing their linear chromosomes, and a variety of membrane-bound organelles, each specialized for a specific cellular function.  These organelles include the mitochondria, responsible for energy production; the endoplasmic reticulum, involved in protein and lipid synthesis; the Golgi apparatus, modifying and packaging proteins; and lysosomes, which break down waste materials.  Plant cells further distinguish themselves through the presence of a cell wall providing structural support and chloroplasts, the sites of photosynthesis.\n\nDespite these structural differences, both prokaryotic and eukaryotic cells share several fundamental characteristics.  Both cell types are enclosed by a plasma membrane, a selectively permeable barrier regulating the passage of substances into and out of the cell.  The cytoplasm, the region within the plasma membrane, contains the cytosol, a gel-like substance, and various cellular components.  Both cell types utilize ribosomes, though differing in size and composition, for protein synthesis.  Furthermore, both cell types possess a genetic blueprint encoded in DNA, although the organization and packaging of DNA differ significantly.  Prokaryotes use simpler mechanisms for DNA replication and gene regulation compared to the more complex systems found in eukaryotes.  Finally, both cell types use similar basic metabolic pathways for energy generation and nutrient processing, although specific enzymes and mechanisms may vary. Understanding these shared features and distinct characteristics is crucial for comprehending the vast spectrum of cellular life and the evolutionary relationships between different organisms.  The variations in cell structure directly reflect the diverse functions cells perform within their respective organisms, illustrating the elegant interplay between form and function at the cellular level.  For instance, the elongated shape of nerve cells facilitates long-distance signaling, while the spherical shape of many immune cells allows for efficient movement and engulfment of foreign particles.","activities":["Compare and contrast prokaryotic and eukaryotic cells using a Venn diagram."],"resources":["OpenStax Biology, Chapter 4: A Tour of the Cell"],"quiz":{"title":"Quiz: Cell Diversity and Commonality","questions":[{"question":"Which of the following is NOT a characteristic shared by both prokaryotic and eukaryotic cells?","options":["Plasma membrane","Cytoplasm","Membrane-bound nucleus","Ribosomes"],"correctIndex":2,"explanation":"While both cell types possess a plasma membrane and cytoplasm, and ribosomes for protein synthesis, only eukaryotic cells have a membrane-bound nucleus."},{"question":"Which cellular structure is responsible for energy production in eukaryotic cells?","options":["Golgi apparatus","Lysosomes","Mitochondria","Endoplasmic reticulum"],"correctIndex":2,"explanation":"Mitochondria are the powerhouses of eukaryotic cells, generating ATP through cellular respiration."},{"question":"Where is the genetic material located in a prokaryotic cell?","options":["Nucleus","Nucleoid","Cytoplasm (dispersed)","Mitochondria"],"correctIndex":1,"explanation":"Prokaryotic cells lack a membrane-bound nucleus; their genetic material is found in a region called the nucleoid."},{"question":"Which of the following organelles is unique to plant cells?","options":["Mitochondria","Ribosomes","Chloroplasts","Endoplasmic reticulum"],"correctIndex":2,"explanation":"Chloroplasts are responsible for photosynthesis and are found only in plant cells and some protists."}]}}]},{"title":"Microscopy and Cell Visualization","description":"This module explores the techniques used to visualize cells, including light and electron microscopy.","lessons":[{"title":"Light Microscopy","content":"Light microscopy, a cornerstone of biological research and numerous other scientific fields, relies on the principles of visible light to visualize specimens.  Understanding these principles is crucial to effectively using this technique.  Light passes through a condenser lens, focusing the beam onto the specimen.  The light then interacts with the specimen;  some light is absorbed, some is scattered, and some passes through. The light that passes through the specimen then travels through the objective lens, which magnifies the image.  This magnified image is further magnified by the ocular lens (eyepiece), resulting in the final image observed by the user. The total magnification is calculated by multiplying the magnification of the objective lens by the magnification of the ocular lens. For example, a 10x ocular lens and a 40x objective lens will yield a 400x total magnification.  Different objective lenses provide varying levels of magnification and numerical aperture (NA), a measure of the lens' ability to gather light and resolve fine details. Higher NA objective lenses allow for better resolution, meaning the ability to distinguish between two closely spaced objects.\n\nHowever, light microscopy has inherent limitations.  The resolution is limited by the wavelength of visible light, typically around 200 nanometers. This means that structures smaller than this cannot be effectively resolved, even with high magnification.  Another limitation is the depth of field, which refers to the thickness of the specimen that is in sharp focus at any given time.  Thicker specimens may appear blurry because only a thin section is in focus.  Furthermore, the contrast between different parts of the specimen can be low, making it difficult to visualize certain structures. Techniques like staining are employed to enhance contrast, using dyes that selectively bind to specific cellular components, improving visibility.  Examples include hematoxylin and eosin (H&E) staining for tissue samples, or Gram staining for bacteria.\n\nDespite its limitations, light microscopy remains a widely used and valuable tool.  Its applications are incredibly diverse.  In biology, it's used to observe living cells and their dynamic processes, such as cell division, movement, and interactions.  Pathologists use light microscopy extensively to diagnose diseases by examining tissue samples.  In materials science, it can be used to analyze the microstructure of materials.  Different types of light microscopy exist, each with its own advantages and applications.  Phase-contrast microscopy, for example, enhances contrast in transparent specimens by exploiting differences in refractive index.  Fluorescence microscopy utilizes fluorescent dyes or proteins to visualize specific molecules or structures within cells, offering high specificity and sensitivity.  Confocal microscopy further refines fluorescence microscopy by using a pinhole to eliminate out-of-focus light, resulting in sharper, higher-resolution images of thicker specimens.  The choice of microscopy technique depends heavily on the specific research question and the nature of the specimen being studied.","activities":["Observe prepared slides under a light microscope."],"resources":["Laboratory manual on microscopy techniques"],"quiz":{"title":"Quiz: Light Microscopy","questions":[{"question":"In light microscopy, what is the primary function of the condenser lens?","options":["To focus the light beam onto the specimen","To magnify the image of the specimen","To filter the light before it reaches the specimen","To adjust the intensity of the light source"],"answer":0,"explanation":"The condenser lens focuses the light beam onto the specimen, ensuring proper illumination for observation."},{"question":"How is the total magnification of a light microscope calculated?","options":["By adding the magnification of the objective and ocular lenses","By subtracting the magnification of the objective lens from the ocular lens","By multiplying the magnification of the objective and ocular lenses","By dividing the magnification of the objective lens by the ocular lens"],"answer":2,"explanation":"Total magnification is the product of the objective lens magnification and the ocular lens magnification."},{"question":"What is numerical aperture (NA) in the context of light microscopy?","options":["A measure of the lens' ability to gather light and resolve fine details","The magnification power of the objective lens","The distance between the objective lens and the specimen","The wavelength of light used for illumination"],"answer":0,"explanation":"Numerical aperture (NA) is a measure of a lens's ability to gather light and resolve fine details; higher NA means better resolution."}]}},{"title":"Electron Microscopy","content":"Electron microscopy, a powerful technique offering significantly higher resolution than light microscopy, relies on a beam of electrons to illuminate a specimen, rather than photons.  This fundamental difference allows for visualization of structures at the nanometer scale, revealing details invisible to conventional light microscopes.  There are two primary types: scanning electron microscopy (SEM) and transmission electron microscopy (TEM), each with unique principles and applications.\n\nSEM works by rastering a focused electron beam across the surface of a sample.  As the electrons interact with the sample's surface, they cause the emission of secondary electrons, backscattered electrons, and characteristic X-rays.  These signals are detected and used to generate a three-dimensional image of the sample's topography and surface composition. For example, SEM is frequently used to examine the surface structures of pollen grains, revealing intricate patterns and textures. The high resolution allows for detailed analysis of surface features like pores, ridges, and spines.  Its advantages include its relatively simple sample preparation and the generation of high-resolution images showing surface detail. However, SEM has limitations; it only provides information about the surface of the sample, and the imaging process can potentially damage or alter delicate samples.\n\nTEM, on the other hand, utilizes a beam of electrons that is transmitted through a very thin specimen.  The electrons interact with the sample's internal structure, and the resulting transmitted electrons are used to create an image.  Areas of high electron density, such as heavy metal stains, appear darker in the image, while areas of low density appear brighter.  This allows visualization of internal cellular structures like organelles and macromolecular complexes.  For instance, TEM is invaluable for studying the ultrastructure of viruses, revealing their capsid structure and internal components.  The high resolution of TEM enables visualization of individual proteins within cellular structures, providing crucial insights into their organization and function.  While TEM provides unparalleled resolution for visualizing internal structures, it requires extensive sample preparation, including ultra-thin sectioning, often involving embedding the sample in resin and staining with heavy metals.  This process can introduce artifacts and may not be suitable for all types of samples.  Furthermore, TEM images are typically two-dimensional projections of a three-dimensional structure, requiring sophisticated image processing techniques for accurate interpretation.  Both SEM and TEM, therefore, present unique advantages and disadvantages, making the choice of technique dependent on the specific research question and the nature of the sample being studied.","activities":["Analyze electron micrographs of different cell types."],"resources":["Online resources with electron micrographs"],"quiz":{"title":"Quiz: Electron Microscopy","questions":[{"question":"What is the primary advantage of electron microscopy over light microscopy?","options":["Significantly higher resolution","Ability to visualize living cells","Simpler sample preparation","Lower cost"],"answer":0,"explanation":"Electron microscopy uses a beam of electrons, which has a much shorter wavelength than light, allowing for significantly higher resolution and the visualization of much smaller structures."},{"question":"Which type of electron microscopy is best suited for visualizing the three-dimensional surface topography of a sample?","options":["Transmission Electron Microscopy (TEM)","Scanning Electron Microscopy (SEM)","Both TEM and SEM equally","Neither TEM nor SEM"],"answer":1,"explanation":"Scanning Electron Microscopy (SEM) uses a rastering electron beam to scan the surface of a sample, generating images based on the detected secondary electrons, backscattered electrons, and X-rays. This provides detailed information about the sample's surface topography."},{"question":"In Transmission Electron Microscopy (TEM), the image is formed by:","options":["Electrons transmitted through a thin specimen","Secondary electrons emitted from the specimen's surface","Backscattered electrons reflected from the specimen's surface","X-rays emitted from the specimen"],"answer":0,"explanation":"TEM uses a beam of electrons that is transmitted through a very thin specimen. The interaction of the electrons with the specimen creates an image based on the transmitted electrons."},{"question":"What is a potential limitation of Scanning Electron Microscopy (SEM)?","options":["It provides only surface information","It requires extremely thin samples","It has lower resolution than light microscopy","It cannot image biological samples"],"answer":0,"explanation":"SEM only provides information about the surface of the sample; it does not provide information about the sample's internal structure."}]}}]},{"title":"Prokaryotic vs. Eukaryotic Cells","description":"A detailed comparison of prokaryotic and eukaryotic cells, focusing on their structural differences and functional implications.","lessons":[{"title":"Prokaryotic Cell Structure","content":"Prokaryotic cells, the fundamental units of bacteria and archaea, are structurally simpler than eukaryotic cells but exhibit remarkable diversity in their adaptations to various environments.  A detailed examination of their components reveals a surprisingly intricate organization, despite the absence of membrane-bound organelles.  The defining feature is the lack of a nucleus; their genetic material, a single circular chromosome, resides in a region called the nucleoid.  This area isn't enclosed by a membrane, unlike the nucleus in eukaryotic cells.  The nucleoid is often associated with proteins that help organize and compact the DNA.  Beyond the chromosome, many prokaryotes also possess smaller, circular DNA molecules called plasmids. These plasmids often carry genes conferring advantageous traits such as antibiotic resistance or the ability to utilize specific nutrients, and can be transferred between cells.\n\nThe cytoplasm, the gel-like substance filling the cell, is teeming with ribosomes, responsible for protein synthesis. Prokaryotic ribosomes are smaller (70S) than those found in eukaryotes (80S), a difference exploited by some antibiotics that target bacterial ribosomes without affecting human cells.  Embedded within the cytoplasm are various enzymes and metabolic pathways crucial for energy production and biosynthesis.  Many prokaryotes also possess inclusion bodies, storage compartments for nutrients like glycogen or polyphosphate granules, providing a reserve for times of scarcity.  These inclusions can vary greatly depending on the species and environmental conditions.  For example, cyanobacteria, photosynthetic bacteria, possess specialized inclusion bodies containing gas vesicles that regulate buoyancy in aquatic environments.\n\nThe cell membrane, a selectively permeable barrier, controls the passage of substances into and out of the cell.  It's composed of a phospholipid bilayer similar to eukaryotic cell membranes but often lacks sterols, a component that provides rigidity in eukaryotic membranes.  Many prokaryotes have a cell wall external to the cell membrane, providing structural support and protection.  Bacterial cell walls are primarily composed of peptidoglycan, a unique polymer of sugars and amino acids.  The Gram-staining technique differentiates bacteria based on their cell wall structure; Gram-positive bacteria have a thick peptidoglycan layer, while Gram-negative bacteria have a thinner layer and an outer membrane containing lipopolysaccharide (LPS), a potent endotoxin. Archaea, on the other hand, have cell walls composed of various other materials, like pseudomurein, showcasing their distinct evolutionary lineage.\n\nMany prokaryotes also possess external structures like flagella, long whip-like appendages used for motility, enabling them to navigate towards nutrients or away from harmful substances.  Pili, shorter and thinner than flagella, are involved in attachment to surfaces or in conjugation, a process of genetic exchange between bacterial cells.  A capsule, a sticky outer layer composed of polysaccharides or proteins, surrounds some prokaryotes, contributing to their virulence by protecting them from host immune responses or facilitating adhesion to surfaces.  The diverse array of structures and adaptations found in prokaryotic cells highlights their remarkable adaptability and ecological significance.","activities":["Draw and label a prokaryotic cell."],"resources":["OpenStax Biology, Chapter 4: A Tour of the Cell"],"quiz":{"title":"Quiz: Prokaryotic Cell Structure","questions":[{"question":"Which of the following is NOT a characteristic of prokaryotic cells?","options":["Lack of a nucleus","Presence of a single circular chromosome","Presence of membrane-bound organelles","Presence of ribosomes"],"correctIndex":2,"explanation":"Prokaryotic cells are defined by their lack of membrane-bound organelles, unlike eukaryotic cells."},{"question":"Where is the genetic material located in a prokaryotic cell?","options":["Nucleoid","Nucleus","Cytoplasm (diffusely)","Plasmids"],"correctIndex":0,"explanation":"The genetic material (single circular chromosome) is found in the nucleoid region, which is not membrane-bound."},{"question":"What are plasmids in prokaryotic cells?","options":["Small, circular DNA molecules","Storage compartments for nutrients","Components of the cell wall","Types of ribosomes"],"correctIndex":0,"explanation":"Plasmids are small, circular DNA molecules that often carry genes for advantageous traits."},{"question":"What is the size difference between prokaryotic and eukaryotic ribosomes?","options":["Prokaryotic ribosomes are larger (80S)","Eukaryotic ribosomes are larger (80S)","They are the same size","The size difference is not significant"],"correctIndex":1,"explanation":"Prokaryotic ribosomes are 70S, while eukaryotic ribosomes are 80S. This difference is exploited by some antibiotics."}]}},{"title":"Eukaryotic Cell Structure","content":"This lesson delves into the intricate world of eukaryotic cells, exploring their diverse components and their specific roles in maintaining cellular function. We will examine the key organelles found within these cells, highlighting their structural features and the vital processes they facilitate.  A central theme will be the comparison of animal and plant cells, revealing both their shared characteristics and their significant differences.  We will begin by examining the nucleus, the control center of the eukaryotic cell, housing the cell's genetic material—DNA—organized into chromosomes.  The nucleus is enclosed by a double membrane called the nuclear envelope, punctuated by nuclear pores that regulate the transport of molecules between the nucleus and the cytoplasm.  The nucleolus, a dense region within the nucleus, is responsible for ribosome biogenesis.  Moving outward, we encounter the endoplasmic reticulum (ER), a network of interconnected membranes extending throughout the cytoplasm.  The rough ER, studded with ribosomes, plays a crucial role in protein synthesis and modification, while the smooth ER synthesizes lipids and detoxifies harmful substances.  The Golgi apparatus, or Golgi complex, receives proteins and lipids from the ER, further processes, sorts, and packages them into vesicles for transport to their final destinations within or outside the cell.  Lysosomes, membrane-bound organelles containing digestive enzymes, break down waste materials, cellular debris, and ingested substances.  Mitochondria, the powerhouses of the cell, are responsible for cellular respiration, generating ATP—the cell's main energy currency.  They possess their own DNA and ribosomes, remnants of their endosymbiotic origin.  Plant cells, in addition to these organelles, possess several unique structures.  The most prominent is the large central vacuole, which maintains turgor pressure, stores water and nutrients, and plays a role in waste disposal.  Chloroplasts, the sites of photosynthesis, contain chlorophyll and other pigments that capture light energy to convert carbon dioxide and water into glucose.  Their double membrane structure and the presence of their own DNA and ribosomes further support the endosymbiotic theory.  The rigid cell wall, composed primarily of cellulose, provides structural support and protection to the plant cell.  Finally, plasmodesmata, channels that connect adjacent plant cells, facilitate communication and transport between them.  In contrast, animal cells lack a cell wall, a large central vacuole, and chloroplasts.  However, they may contain other specialized structures, such as cilia and flagella for motility, and centrioles, which play a role in cell division.  Understanding the structure and function of these organelles is crucial to grasping the complexities of eukaryotic cell biology and the diverse roles these cells play in multicellular organisms.","activities":["Draw and label an animal and a plant cell."],"resources":["OpenStax Biology, Chapter 4: A Tour of the Cell"],"quiz":{"title":"Quiz: Eukaryotic Cell Structure","questions":[{"question":"Which organelle is responsible for ribosome biogenesis?","options":["Nucleolus","Rough Endoplasmic Reticulum","Golgi Apparatus","Lysosome"],"correctIndex":0,"explanation":"The nucleolus, located within the nucleus, is the site of ribosome synthesis."},{"question":"What is the function of the smooth endoplasmic reticulum?","options":["Protein synthesis","Lipid synthesis and detoxification","Protein modification and packaging","Waste breakdown"],"correctIndex":1,"explanation":"The smooth ER is involved in lipid synthesis and the detoxification of harmful substances."},{"question":"What structure regulates the transport of molecules between the nucleus and the cytoplasm?","options":["Nuclear envelope","Nuclear pores","Chromosomes","Nucleolus"],"correctIndex":1,"explanation":"Nuclear pores, embedded within the nuclear envelope, control the passage of molecules in and out of the nucleus."},{"question":"Which organelle is primarily responsible for modifying, sorting, and packaging proteins?","options":["Rough Endoplasmic Reticulum","Golgi Apparatus","Lysosome","Mitochondria"],"correctIndex":1,"explanation":"The Golgi apparatus receives, processes, and packages proteins and lipids from the ER before sending them to their final destinations."}]}},{"title":"Endosymbiotic Theory","content":"The endosymbiotic theory proposes that eukaryotic cells evolved from a symbiotic relationship between different prokaryotic organisms.  This revolutionary idea explains the origin of mitochondria and chloroplasts, two key organelles within eukaryotic cells.  The theory suggests that a larger host prokaryote engulfed a smaller prokaryote, rather than digesting it, initiating a symbiotic relationship.  Over time, this relationship became mutually beneficial, with the smaller prokaryote eventually evolving into an organelle within the larger cell.\n\nSeveral key pieces of evidence strongly support the endosymbiotic theory.  Firstly, mitochondria and chloroplasts possess their own circular DNA, separate from the cell's nuclear DNA. This is reminiscent of the genetic material found in prokaryotes.  Secondly, both organelles have their own ribosomes, which are smaller and more similar to prokaryotic ribosomes than to the eukaryotic ribosomes found in the cytoplasm. This suggests an independent protein synthesis mechanism within these organelles.  Thirdly, the double membrane structure of mitochondria and chloroplasts provides further evidence.  The inner membrane is believed to be the original membrane of the engulfed prokaryote, while the outer membrane is thought to be derived from the host cell's membrane during the engulfment process.  Fourthly, the replication process of mitochondria and chloroplasts is similar to binary fission, a form of asexual reproduction seen in prokaryotes, rather than the mitotic division seen in the eukaryotic cell itself.  This independent replication further supports their independent origins.  Finally, the size and shape of mitochondria and chloroplasts are comparable to those of certain free-living bacteria, strengthening the link to prokaryotic ancestry.  For example, the size and morphology of mitochondria closely resemble alpha-proteobacteria, suggesting a strong evolutionary relationship.  Similarly, chloroplasts show striking similarities to cyanobacteria, hinting at their origin as photosynthetic prokaryotes.  These independent lines of evidence, taken together, provide a compelling case for the endosymbiotic origin of these crucial eukaryotic organelles.  The endosymbiotic theory is not just a historical event; it's a continuing process, with new research continuously refining our understanding of this critical evolutionary step.  The ongoing study of genomes, including those of both eukaryotic and prokaryotic organisms, continues to provide fresh insights into this intricate evolutionary relationship and the development of the complex eukaryotic cell.","activities":["Discuss the evidence for the endosymbiotic theory."],"resources":["Relevant scientific articles on endosymbiosis"],"quiz":{"title":"Quiz: Endosymbiotic Theory","questions":[{"question":"Which organelles are primarily explained by the endosymbiotic theory?","options":["Mitochondria and Chloroplasts","Golgi apparatus and Endoplasmic Reticulum","Ribosomes and Vacuoles","Lysosomes and Peroxisomes"],"answer":0,"explanation":"The endosymbiotic theory focuses on the origin of mitochondria and chloroplasts within eukaryotic cells."},{"question":"What type of DNA is found within mitochondria and chloroplasts?","options":["Linear DNA","Circular DNA","RNA only","No DNA"],"answer":1,"explanation":"Mitochondria and chloroplasts possess their own circular DNA, similar to prokaryotic cells."},{"question":"The double membrane of mitochondria and chloroplasts is thought to represent:","options":["A single membrane that folded in on itself","The fusion of two different eukaryotic membranes","The original prokaryotic membrane and the host cell's membrane","An artifact of cell division"],"answer":2,"explanation":"The inner membrane is believed to be from the engulfed prokaryote, and the outer from the host cell."},{"question":"What process is similar to the replication of mitochondria and chloroplasts?","options":["Meiosis","Mitosis","Binary fission","Budding"],"answer":2,"explanation":"Mitochondria and chloroplasts replicate through binary fission, a form of asexual reproduction common in prokaryotes."}]}}]},{"title":"Cellular Organelles and Communication","description":"This module explores the structure and function of major cellular organelles and mechanisms of intercellular communication.","lessons":[{"title":"The Endomembrane System","content":"The endomembrane system is a dynamic network of interconnected organelles working together in eukaryotic cells.  Its primary function is the synthesis, modification, and transport of lipids and proteins. This intricate system isn't just a collection of individual components; it's a highly coordinated assembly line, ensuring molecules reach their correct destinations within the cell or are secreted outside.  Central to this system are several key organelles: the endoplasmic reticulum (ER), Golgi apparatus, lysosomes, and vacuoles.  The precise movement of materials between these organelles depends on vesicle trafficking—small membrane-bound sacs that bud off from one organelle and fuse with another, carrying their cargo along the way.\n\nThe endoplasmic reticulum, a vast network of interconnected membranes, is divided into two main regions: the rough ER and the smooth ER.  The rough ER, studded with ribosomes, is the primary site of protein synthesis for many secreted proteins and membrane-bound proteins.  Ribosomes translate mRNA into polypeptide chains, which are then folded and modified within the rough ER lumen.  This modification often includes glycosylation, the addition of sugar chains, which is crucial for protein function and targeting.  The smooth ER, lacking ribosomes, plays a significant role in lipid synthesis, including phospholipids and steroids. It also participates in detoxification processes, particularly in liver cells, breaking down harmful substances.\n\nFrom the ER, proteins and lipids are transported to the Golgi apparatus, a stack of flattened, membrane-bound sacs called cisternae.  Here, the molecules undergo further processing and sorting.  The Golgi apparatus acts as a processing and packaging center, modifying molecules, adding further carbohydrates, and sorting them into different vesicles based on their final destination.  This sorting involves specific signals within the molecules themselves, directing them to lysosomes, the plasma membrane, or other organelles.\n\nLysosomes are membrane-bound organelles containing hydrolytic enzymes capable of breaking down a wide range of macromolecules, including proteins, nucleic acids, carbohydrates, and lipids. These enzymes function best in an acidic environment, maintained by a proton pump within the lysosomal membrane. Lysosomes are crucial for waste recycling within the cell, digesting materials taken in by endocytosis, and breaking down worn-out organelles through autophagy.  Vacuoles, particularly prominent in plant cells, perform similar functions to lysosomes, but also play a crucial role in storing water, nutrients, and waste products.  They contribute significantly to maintaining turgor pressure in plant cells.\n\nThe entire process, from protein synthesis in the rough ER to secretion from the cell or delivery to other organelles, is a complex and regulated process involving various protein coats that help form and target vesicles, motor proteins that transport them along cytoskeletal tracks, and specific fusion machinery to ensure vesicle delivery to the correct target membrane.  Understanding the endomembrane system is fundamental to comprehending cellular function and the intricate processes that maintain cellular homeostasis.  Disruptions in this system can lead to various cellular malfunctions and diseases.","activities":["Trace the path of a protein through the endomembrane system."],"resources":["OpenStax Biology, Chapter 4: A Tour of the Cell"],"quiz":{"title":"Quiz: The Endomembrane System","questions":[{"question":"Which of the following is NOT a key organelle of the endomembrane system?","options":["Mitochondria","Golgi apparatus","Endoplasmic reticulum","Lysosomes"],"correctIndex":0,"explanation":"Mitochondria are involved in energy production and are not part of the endomembrane system."},{"question":"What is the primary function of the rough endoplasmic reticulum (RER)?","options":["Lipid synthesis","Detoxification","Protein synthesis","Carbohydrate storage"],"correctIndex":2,"explanation":"The RER is studded with ribosomes, which synthesize proteins destined for secretion or membrane incorporation."},{"question":"Vesicle trafficking is crucial for:","options":["Maintaining cell shape","Generating ATP","Transporting materials between organelles","DNA replication"],"correctIndex":2,"explanation":"Vesicles move molecules between organelles within the endomembrane system."},{"question":"Glycosylation, the addition of sugar chains to proteins, primarily occurs in the:","options":["Smooth endoplasmic reticulum","Golgi apparatus","Lysosomes","Nucleus"],"correctIndex":1,"explanation":"While glycosylation begins in the RER, it is often further modified and completed in the Golgi apparatus."}]}},{"title":"The Cytoskeleton","content":"The cytoskeleton, a complex and dynamic network of protein filaments, is crucial for maintaining cell shape, facilitating intracellular transport, enabling cell motility, and orchestrating cell division.  It's not a static structure but rather a constantly rearranging framework that responds to cellular needs.  Think of it as the cell's internal scaffolding, providing both structural support and a system of roadways for moving cargo.  This intricate network is composed of three major types of protein filaments: microtubules, microfilaments (also known as actin filaments), and intermediate filaments.\n\nMicrotubules, the thickest of the three, are hollow tubes made of the protein tubulin.  They are responsible for a variety of cellular processes, including the separation of chromosomes during cell division.  They form the mitotic spindle, which pulls duplicated chromosomes apart, ensuring each daughter cell receives a complete set of genetic material.  Microtubules also serve as tracks for motor proteins, such as kinesin and dynein, which transport organelles and vesicles throughout the cell.  Imagine these motor proteins as tiny trucks carrying packages along the microtubule highways.  Cilia and flagella, hair-like appendages found on the surface of some cells, are also built from microtubules arranged in a characteristic 9+2 pattern. Cilia beat rhythmically to move fluids across cell surfaces, as seen in the lining of the respiratory tract, while flagella propel entire cells, like sperm cells.\n\nMicrofilaments, made of the protein actin, are thinner and more flexible than microtubules. They are primarily involved in cell shape, movement, and cytokinesis, the division of the cytoplasm during cell division.  Actin filaments form a dense network just beneath the cell membrane, contributing significantly to cell shape and cortical tension.  They also play a critical role in cell locomotion, forming structures like lamellipodia and filopodia, which extend outward to explore the environment and allow the cell to crawl.  Muscle contraction relies heavily on the interaction of actin filaments with myosin motor proteins.  The coordinated sliding of these filaments generates the force needed for muscle movement.\n\nIntermediate filaments, as their name suggests, are intermediate in size between microtubules and microfilaments.  They are composed of a diverse array of proteins, varying depending on cell type.  Their primary function is to provide mechanical strength and support to the cell, anchoring organelles and resisting tension.  They form a strong, durable scaffold within the cell, contributing to its structural integrity and resilience.  Examples include keratin filaments in epithelial cells, which strengthen the skin and other epithelial tissues, and neurofilaments in neurons, which provide structural support for the long axons of nerve cells.  Unlike microtubules and microfilaments, intermediate filaments are generally not involved in dynamic processes like intracellular transport or cell motility.  They primarily serve a structural role, contributing to overall cell stability.  The diverse nature of intermediate filaments highlights the specialized adaptations found within different cell types.","activities":["Compare and contrast the three types of cytoskeletal filaments."],"resources":["OpenStax Biology, Chapter 4: A Tour of the Cell"],"quiz":{"title":"Quiz: The Cytoskeleton","questions":[{"question":"Which of the following is NOT a major component of the cytoskeleton?","options":["Microtubules","Microfilaments","Intermediate filaments","Cellulose"],"answer":3,"explanation":"Cellulose is a major component of plant cell walls, not the cytoskeleton."},{"question":"What is the primary function of microtubules during cell division?","options":["Providing structural support to the cell membrane","Transporting vesicles within the cell","Separating chromosomes","Generating ATP"],"answer":2,"explanation":"Microtubules form the mitotic spindle, which is essential for separating chromosomes during cell division."},{"question":"Which type of cytoskeletal filament is the thickest?","options":["Microfilaments","Intermediate filaments","Microtubules","All are roughly the same thickness"],"answer":2,"explanation":"Microtubules are the thickest filaments of the cytoskeleton."},{"question":"The motor proteins kinesin and dynein primarily use which cytoskeletal component for intracellular transport?","options":["Microfilaments","Intermediate filaments","Microtubules","All three equally"],"answer":2,"explanation":"Kinesin and dynein are motor proteins that 'walk' along microtubules, transporting organelles and vesicles."}]}},{"title":"Cell Communication","content":"Cell communication is crucial for multicellular organisms, relying heavily on direct connections between cells and the extracellular environment.  Intercellular junctions are specialized structures that facilitate communication and adhesion between adjacent cells.  These junctions are not merely static connectors; they dynamically regulate the passage of molecules and signals, contributing significantly to tissue integrity and function.  There are several major types of intercellular junctions, each with a unique role.  Tight junctions, for example, form a nearly impermeable seal between cells, preventing the passage of substances between them. This is vital in tissues like the lining of the digestive tract, where it prevents the leakage of harmful substances into the bloodstream.  Gap junctions, conversely, create channels that directly connect the cytoplasm of adjacent cells, allowing for the rapid exchange of ions and small molecules.  This is critical in tissues requiring coordinated activity, such as cardiac muscle, where synchronized contractions are essential.  Adherens junctions and desmosomes provide strong mechanical attachments, holding cells together and contributing to the structural integrity of tissues.  Adherens junctions utilize cadherin proteins to link the actin cytoskeletons of adjacent cells, while desmosomes connect intermediate filaments, providing even greater strength.  The specific types and abundance of junctions vary significantly depending on the tissue type and its functional requirements.  For instance, epithelial tissues, which form linings and coverings, typically exhibit a rich array of junctions, whereas connective tissues may rely more on the extracellular matrix for structural support.\n\nThe extracellular matrix (ECM) is a complex network of proteins and polysaccharides that surrounds cells, providing structural support, influencing cell behavior, and mediating intercellular communication.  The major components of the ECM include collagen, elastin, and various proteoglycans.  Collagen fibers provide tensile strength, resisting stretching forces, while elastin fibers allow tissues to stretch and recoil.  Proteoglycans, with their highly hydrated structure, contribute to the compression resistance of the ECM.  The ECM is not merely a passive scaffold; it actively participates in cell signaling.  Integrins, transmembrane receptors, connect the ECM to the intracellular cytoskeleton, transmitting signals bidirectionally.  Changes in the ECM composition can trigger intracellular signaling pathways, influencing cell growth, differentiation, and migration.  For example, the stiffness of the ECM can affect cell shape and gene expression.  A stiffer ECM, such as that found in cancerous tissues, might promote uncontrolled cell growth and metastasis.  Conversely, a more compliant ECM might encourage cell differentiation and tissue repair.  The intricate interplay between cells and the ECM highlights the dynamic nature of cell communication and its crucial role in tissue homeostasis and disease. The ECM's role in cell communication is further emphasized by the presence of signaling molecules embedded within it, allowing for both local and long-range signaling events to occur.","activities":["Compare and contrast different types of cell junctions."],"resources":["OpenStax Biology, Chapter 4: A Tour of the Cell"],"quiz":{"title":"Quiz: Cell Communication and Intercellular Junctions","questions":[{"question":"Which type of intercellular junction creates a nearly impermeable seal between cells, preventing the passage of substances?","options":["Tight junctions","Gap junctions","Adherens junctions","Desmosomes"],"correctIndex":0,"explanation":"Tight junctions form a tight seal between cells, preventing leakage between them. This is crucial in tissues like the lining of the digestive tract."},{"question":"Which junctions directly connect the cytoplasm of adjacent cells, allowing for rapid exchange of ions and small molecules?","options":["Gap junctions","Tight junctions","Desmosomes","Adherens junctions"],"correctIndex":0,"explanation":"Gap junctions create channels that directly connect the cytoplasm of adjacent cells, enabling rapid communication and coordinated activity, as seen in cardiac muscle."},{"question":"Which type of junction utilizes cadherin proteins to link the actin cytoskeletons of adjacent cells?","options":["Adherens junctions","Desmosomes","Gap junctions","Tight junctions"],"correctIndex":0,"explanation":"Adherens junctions employ cadherin proteins to connect the actin cytoskeletons, contributing to cell adhesion and tissue integrity."},{"question":"Desmosomes primarily provide:","options":["Strong mechanical attachment between cells","Impermeable barriers between cells","Channels for rapid intercellular communication","Anchorage for the extracellular matrix"],"correctIndex":0,"explanation":"Desmosomes are known for their strong mechanical attachments, connecting intermediate filaments and providing significant structural support to tissues."}]}}]}],"id":"course_1747638335647","name":"Cell Structure and Cell Theory","updatedAt":"2025-05-19T07:05:35.647Z","createdAt":"2025-05-19T07:05:35.647Z"};
+        let courseProgress = { completedLessons: {}, quizScores: {}, quizAnswers: {} };
+        let currentQuizInfo = { moduleIndex: null, lessonIndex: null, currentQuestionIndex: 0, score: 0 };
+
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') { try { unsafe = String(unsafe); } catch (e) { return ''; } }
+            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Fisher-Yates (Knuth) Shuffle algorithm
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            // While there remain elements to shuffle.
+            while (currentIndex !== 0) {
+                // Pick a remaining element.
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+
+        function toggleModule(moduleIndex) {
+            const moduleContent = document.getElementById('module-' + moduleIndex + '-content');
+            const moduleToggle = document.querySelector(`.module[data-module-id="${moduleIndex}"] .module-toggle`);
+            if (moduleContent && moduleToggle) {
+                const isVisible = moduleContent.style.display === 'block';
+                moduleContent.style.display = isVisible ? 'none' : 'block';
+                moduleToggle.textContent = isVisible ? '▼' : '▲';
+            }
+        }
+
+        function toggleLessonCompletion(moduleIndex, lessonIndex, checkbox) {
+            const moduleId = `module-${moduleIndex}`;
+            const lessonId = `lesson-${lessonIndex}`;
+            if (!courseProgress.completedLessons[moduleId]) courseProgress.completedLessons[moduleId] = [];
+            const lessonSet = new Set(courseProgress.completedLessons[moduleId]);
+            if (checkbox.checked) lessonSet.add(lessonId); else lessonSet.delete(lessonId);
+            courseProgress.completedLessons[moduleId] = Array.from(lessonSet);
+            checkModuleCompletion(moduleIndex);
+            updateProgressUI();
+            saveProgressToLocal();
+        }
+
+        function checkModuleCompletion(moduleIndex) {
+            const moduleId = `module-${moduleIndex}`;
+            const moduleData = courseData.modules[moduleIndex];
+            if (!moduleData || !moduleData.lessons) return;
+            const totalLessonsInModule = moduleData.lessons.length;
+            const completedLessonsInModule = courseProgress.completedLessons[moduleId]?.length || 0;
+            const allCompleted = totalLessonsInModule > 0 && completedLessonsInModule === totalLessonsInModule;
+            const moduleSet = new Set(courseProgress.completedModules || []);
+            if (allCompleted) moduleSet.add(moduleId); else moduleSet.delete(moduleId);
+            courseProgress.completedModules = Array.from(moduleSet);
+        }
+        
+        function updateCheckboxesOnLoad() {
+            document.querySelectorAll('.lesson-checkbox').forEach(checkbox => {
+                const modId = `module-${checkbox.dataset.moduleId}`;
+                const lessId = `lesson-${checkbox.dataset.lessonId}`;
+                checkbox.checked = courseProgress.completedLessons[modId]?.includes(lessId) || false;
+            });
+        }
+
+        function startQuiz(moduleIndex, lessonIndex) {
+            currentQuizInfo = { moduleIndex, lessonIndex, currentQuestionIndex: 0, score: 0 };
+            const quizData = courseData.modules[moduleIndex]?.lessons[lessonIndex]?.quiz;
+            if (!quizData || !quizData.questions || quizData.questions.length === 0) { alert("Quiz data not found."); return; }
+
+            const quizModal = document.getElementById('quiz-modal');
+            const quizModalTitle = document.getElementById('quiz-modal-title');
+            const quizModalBody = document.getElementById('quiz-modal-body');
+
+            quizModalTitle.textContent = escapeHtml(quizData.title || `Quiz M${moduleIndex+1}.L${lessonIndex+1}`);
+            let quizHTML = `<div class="quiz-container" data-current-quiz-module="${moduleIndex}" data-current-quiz-lesson="${lessonIndex}">
+                              <div class="quiz-progress"><div class="quiz-progress-bar" style="width:0%;"></div></div>
+                              <div class="quiz-questions">`;
+            
+            quizData.questions.forEach((q, qIdx) => {
+                let originalCorrectAnswerValue;
+                let originalCorrectOptionText = '';
+
+                if (typeof q.correctAnswer !== 'undefined') { // Prefer 'correctAnswer' (could be index or text)
+                    originalCorrectAnswerValue = q.correctAnswer;
+                    if (typeof q.correctAnswer === 'number' && q.options[q.correctAnswer]) {
+                        originalCorrectOptionText = q.options[q.correctAnswer];
+                    } else if (typeof q.correctAnswer === 'string' && q.options.includes(q.correctAnswer)) {
+                         originalCorrectOptionText = q.correctAnswer;
+                    } else {
+                        console.warn(`Question ${qIdx}: 'correctAnswer' is present but not a valid index or text in options.`, q);
+                    }
+                } else if (typeof q.correctIndex !== 'undefined' && q.options[q.correctIndex]) { // Fallback to 'correctIndex'
+                    originalCorrectAnswerValue = q.correctIndex; // Store the index
+                    originalCorrectOptionText = q.options[q.correctIndex];
+                } else {
+                    console.error(`Question ${qIdx}: No valid 'correctAnswer' or 'correctIndex' found.`, q);
+                    originalCorrectAnswerValue = 'INVALID_ANSWER_DATA'; // Mark to handle later
+                }
+                
+                const shuffledOptions = q.options ? shuffleArray([...q.options]) : [];
+                let newCorrectIndexForShuffled = -1;
+                if (originalCorrectOptionText) {
+                    newCorrectIndexForShuffled = shuffledOptions.findIndex(opt => String(opt).trim() === String(originalCorrectOptionText).trim());
+                } else if (originalCorrectAnswerValue !== 'INVALID_ANSWER_DATA' && typeof originalCorrectAnswerValue === 'number') {
+                     // This case is less likely if correctOptionText wasn't found from index, but as a fallback
+                    console.warn("Could not determine original correct option text, using index directly might be problematic with shuffling if not handled carefully.")
+                }
+
+
+                quizHTML += `<div class="quiz-question" data-question-index="${qIdx}" style="${qIdx === 0 ? '' : 'display:none;'}">
+                                <p><strong>${qIdx + 1}.</strong> ${escapeHtml(q.question)}</p>
+                                <ul class="quiz-options">${shuffledOptions.map((opt, optIdx) => `
+                                    <li class="quiz-option" data-option-index="${optIdx}" onclick="selectQuizOption(this)">
+                                        ${String.fromCharCode(65 + optIdx)}. ${escapeHtml(opt)}
+                                    </li>`).join('')}
+                                </ul>
+                                <div class="quiz-explanation" style="display:none;" data-correct-answer="${(newCorrectIndexForShuffled !== -1 ? newCorrectIndexForShuffled : escapeHtml(String(originalCorrectAnswerValue)))}">
+                                    <p><strong>Explanation:</strong> ${escapeHtml(q.explanation)}</p>
+                                </div>
+                             </div>`;
+            });
+            quizHTML += `</div>
+                         <div style="margin-top:1rem; text-align:right;">
+                            <button class="submit-answer" onclick="submitQuizAnswer()" disabled>Submit Answer</button>
+                            <button class="next-question" style="display:none;" onclick="nextQuizQuestion()">Next</button>
+                         </div>
+                         <div class="quiz-result" style="display:none;">
+                            <h5>Quiz Complete!</h5>
+                            <div class="quiz-score">0%</div>
+                            <p class="quiz-feedback"></p>
+                            <button onclick="retakeQuiz()">Retake Quiz</button>
+                            <button onclick="closeQuiz()">Close</button>
+                         </div>
+                       </div>`;
+            quizModalBody.innerHTML = quizHTML;
+            document.body.classList.add('modal-open');
+            quizModal.style.display = 'flex';
+            setTimeout(() => quizModal.style.opacity = 1, 10);
+        }
+
+        function closeQuiz() {
+            const quizModal = document.getElementById('quiz-modal');
+            quizModal.style.opacity = 0;
+            setTimeout(() => {
+                quizModal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                document.getElementById('quiz-modal-body').innerHTML = ''; 
+            }, 300);
+            currentQuizInfo = { moduleIndex: null, lessonIndex: null, currentQuestionIndex: 0, score: 0 }; 
+        }
+
+        function selectQuizOption(optionElement) {
+            const questionDiv = optionElement.closest('.quiz-question');
+            if (!questionDiv || optionElement.classList.contains('disabled')) return;
+            questionDiv.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+            optionElement.classList.add('selected');
+            const quizContainer = optionElement.closest('.quiz-container');
+            quizContainer.querySelector('.submit-answer').disabled = false;
+        }
+
+        function submitQuizAnswer() {
+            const { moduleIndex, lessonIndex, currentQuestionIndex } = currentQuizInfo;
+            const quizContainer = document.querySelector(`.quiz-container[data-current-quiz-module="${moduleIndex}"][data-current-quiz-lesson="${lessonIndex}"]`);
+            const questionDiv = quizContainer.querySelector(`.quiz-question[data-question-index="${currentQuestionIndex}"]`);
+            const selectedOption = questionDiv.querySelector('.quiz-option.selected');
+            if (!selectedOption) { alert("Please select an answer."); return; }
+
+            const selectedIndex = parseInt(selectedOption.dataset.optionIndex); 
+
+            const explanationDiv = questionDiv.querySelector('.quiz-explanation');
+            const correctAnswerValueFromAttr = explanationDiv.dataset.correctAnswer; 
+            // Because of shuffling, correctAnswerValueFromAttr should now be the 0-indexed position of the correct answer *in the shuffled list*.
+            // Or it might be the original text if direct index mapping failed during startQuiz shuffle.
+            
+            const currentQuestionData = courseData.modules[moduleIndex]?.lessons[lessonIndex]?.quiz?.questions[currentQuestionIndex];
+            
+            if (!currentQuestionData || !currentQuestionData.options) {
+                console.error("Critical error: Question data or options not found for current quiz item.", currentQuestionData);
+                selectedOption.classList.add('incorrect');
+                selectedOption.classList.add('disabled');
+                questionDiv.querySelectorAll('.quiz-option:not(.selected)').forEach(opt => opt.classList.add('disabled'));
+                if (explanationDiv) explanationDiv.style.display = 'block';
+                quizContainer.querySelector('.submit-answer').style.display = 'none';
+                const nextBtn = quizContainer.querySelector('.next-question');
+                if (nextBtn) {
+                    nextBtn.style.display = 'inline-block';
+                    nextBtn.textContent = currentQuestionIndex >= (courseData.modules[moduleIndex]?.lessons[lessonIndex]?.quiz?.questions?.length || 0) - 1 ? 'Finish Quiz' : 'Next Question';
+                }
+                return;
+            }
+            // Options displayed to the user are from shuffledOptions in startQuiz.
+            // We need to compare selectedIndex against the data-correct-answer which *should be the shuffled index*.
+            const questionOptionsDisplayed = Array.from(questionDiv.querySelectorAll('.quiz-option')).map(opt => opt.textContent.substring(3).trim()); // Get text of displayed options
+
+            let correctIndex = -1; 
+
+            // Primary check: correctAnswerValueFromAttr is the 0-indexed correct position in the SHUFFLED list.
+            const parsedAttrAsIndex = parseInt(correctAnswerValueFromAttr);
+            if (!isNaN(parsedAttrAsIndex) && parsedAttrAsIndex >= 0 && parsedAttrAsIndex < questionOptionsDisplayed.length) {
+                correctIndex = parsedAttrAsIndex;
+            } else {
+                // Fallback: If correctAnswerValueFromAttr was text (e.g., original text of correct answer)
+                // find its index in the *currently displayed shuffled options*.
+                correctIndex = questionOptionsDisplayed.findIndex(optText => String(optText).trim() === String(correctAnswerValueFromAttr).trim());
+                 if (correctIndex === -1) { // Further fallback if it was stored as a letter from original non-shuffled options
+                    if (/^[a-zA-Z]$/.test(correctAnswerValueFromAttr)) {
+                        const letterIndex = correctAnswerValueFromAttr.toUpperCase().charCodeAt(0) - 'A'.charCodeAt(0);
+                        // This check is tricky with shuffling. It's better if data-correct-answer is always the shuffled index or the full text.
+                        // For now, assume it's mostly the shuffled index.
+                        console.warn("Correct answer was a letter, this might be unreliable with shuffled options unless it was mapped to shuffled index correctly.")
+                    }
+                 }
+            }
+
+
+            if (correctIndex === -1) {
+                console.warn(`Could not definitively determine correct answer index based on data-correct-answer='${correctAnswerValueFromAttr}'. Displayed options:`, questionOptionsDisplayed, `Proceeding, but quiz scoring/highlighting might be inaccurate for this question.`);
+            }
+            
+            const quizKey = `module-${moduleIndex}-lesson-${lessonIndex}`;
+            if(!courseProgress.quizAnswers[quizKey]) courseProgress.quizAnswers[quizKey] = [];
+            courseProgress.quizAnswers[quizKey][currentQuestionIndex] = selectedIndex;
+
+            if (selectedIndex === correctIndex && correctIndex !== -1) { 
+                currentQuizInfo.score++;
+            }
+
+            questionDiv.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.add('disabled');
+                const optIdx = parseInt(opt.dataset.optionIndex);
+                if (optIdx === correctIndex && correctIndex !== -1) { 
+                    opt.classList.add('correct');
+                } else if (opt.classList.contains('selected')) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            if (explanationDiv) explanationDiv.style.display = 'block';
+            
+            quizContainer.querySelector('.submit-answer').style.display = 'none';
+            const nextBtn = quizContainer.querySelector('.next-question');
+             if (nextBtn) {
+                nextBtn.style.display = 'inline-block';
+                nextBtn.textContent = currentQuestionIndex >= courseData.modules[moduleIndex].lessons[lessonIndex].quiz.questions.length - 1 ? 'Finish Quiz' : 'Next Question';
+            }
+            saveProgressToLocal();
+        }
+
+
+        function nextQuizQuestion() {
+            const { moduleIndex, lessonIndex } = currentQuizInfo;
+            const quizContainer = document.querySelector(`.quiz-container[data-current-quiz-module="${moduleIndex}"][data-current-quiz-lesson="${lessonIndex}"]`);
+            const questions = courseData.modules[moduleIndex].lessons[lessonIndex].quiz.questions;
+            
+            const currentQuestionDiv = quizContainer.querySelector(`.quiz-question[data-question-index="${currentQuizInfo.currentQuestionIndex}"]`);
+            if (currentQuestionDiv) currentQuestionDiv.style.display = 'none';
+
+            currentQuizInfo.currentQuestionIndex++;
+            const progressBar = quizContainer.querySelector('.quiz-progress-bar');
+            if(progressBar) progressBar.style.width = `${(currentQuizInfo.currentQuestionIndex / questions.length) * 100}%`;
+
+            if (currentQuizInfo.currentQuestionIndex < questions.length) {
+                const nextQuestionDiv = quizContainer.querySelector(`.quiz-question[data-question-index="${currentQuizInfo.currentQuestionIndex}"]`);
+                if (nextQuestionDiv) nextQuestionDiv.style.display = 'block';
+                quizContainer.querySelector('.submit-answer').style.display = 'inline-block';
+                quizContainer.querySelector('.submit-answer').disabled = true; 
+                quizContainer.querySelector('.next-question').style.display = 'none';
+            } else {
+                finishQuizInternal();
+            }
+        }
+        
+        function finishQuizInternal() {
+            const { moduleIndex, lessonIndex, score } = currentQuizInfo;
+            const quizContainer = document.querySelector(`.quiz-container[data-current-quiz-module="${moduleIndex}"][data-current-quiz-lesson="${lessonIndex}"]`);
+            const totalQuestions = courseData.modules[moduleIndex].lessons[lessonIndex].quiz.questions.length;
+            const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+
+            const quizKey = `module-${moduleIndex}-lesson-${lessonIndex}`;
+            courseProgress.quizScores[quizKey] = percentage;
+
+            const resultDiv = quizContainer.querySelector('.quiz-result');
+            resultDiv.querySelector('.quiz-score').textContent = `${percentage}%`;
+            resultDiv.querySelector('.quiz-feedback').textContent = percentage >= 80 ? 'Excellent!' : (percentage >= 60 ? 'Good job!' : 'Keep practicing!');
+            resultDiv.style.display = 'block';
+            quizContainer.querySelector('.quiz-questions').style.display = 'none';
+            quizContainer.querySelector('.submit-answer').style.display = 'none';
+            quizContainer.querySelector('.next-question').style.display = 'none';
+            const progressBar = quizContainer.querySelector('.quiz-progress-bar');
+            if(progressBar) progressBar.style.width = '100%';
+            
+            const mainPageCheckbox = document.querySelector(`.lesson-checkbox[data-module-id="${moduleIndex}"][data-lesson-id="${lessonIndex}"]`);
+            if (mainPageCheckbox && !mainPageCheckbox.checked) {
+                 mainPageCheckbox.checked = true;
+                 const event = new Event('change', { bubbles: true });
+                 mainPageCheckbox.dispatchEvent(event);
+            } else {
+                updateProgressUI(); 
+                saveProgressToLocal();
+            }
+        }
+
+        function retakeQuiz() {
+            const { moduleIndex, lessonIndex } = currentQuizInfo;
+            const quizKey = `module-${moduleIndex}-lesson-${lessonIndex}`;
+            if(courseProgress.quizAnswers[quizKey]) courseProgress.quizAnswers[quizKey] = [];
+            startQuiz(moduleIndex, lessonIndex); 
+        }
+
+        function countTotalLessonsInExport() {
+            return courseData.modules.reduce((sum, mod) => sum + (mod.lessons?.length || 0), 0);
+        }
+
+        function updateProgressUI() {
+            const totalLessons = countTotalLessonsInExport();
+            if (totalLessons <= 0) return;
+            let completedCount = 0;
+            Object.values(courseProgress.completedLessons || {}).forEach(lessons => completedCount += lessons?.length || 0);
+            
+            const overallPercentEl = document.getElementById('overall-progress-percentage');
+            const overallBarEl = document.getElementById('overall-progress-bar');
+            const completedLessonsEl = document.getElementById('completed-lessons-count');
+            const totalLessonsEl = document.getElementById('total-lessons-count');
+            const avgScoreEl = document.getElementById('average-quiz-score');
+            const completedQuizzesEl = document.getElementById('completed-quizzes-count');
+
+            const progressPercentage = Math.round((completedCount / totalLessons) * 100);
+            if(overallPercentEl) overallPercentEl.textContent = `${progressPercentage}%`;
+            if(overallBarEl) overallBarEl.style.width = `${progressPercentage}%`;
+            if(completedLessonsEl) completedLessonsEl.textContent = completedCount;
+            if(totalLessonsEl) totalLessonsEl.textContent = totalLessons;
+
+            const quizScores = Object.values(courseProgress.quizScores || {});
+            const averageScore = quizScores.length > 0 ? Math.round(quizScores.reduce((sum, score) => sum + (score || 0), 0) / quizScores.length) : 0;
+            if(avgScoreEl) avgScoreEl.textContent = `${averageScore}%`;
+            if(completedQuizzesEl) completedQuizzesEl.textContent = quizScores.length;
+            
+            generateModuleProgressUI();
+        }
+
+        function generateModuleProgressUI() {
+            const container = document.getElementById('module-progress-container');
+            if (!container) return;
+            container.innerHTML = '';
+            courseData.modules.forEach((module, moduleIndex) => {
+                const moduleId = `module-${moduleIndex}`;
+                const totalLessonsInModule = module.lessons?.length || 0;
+                const completedLessonsInModule = courseProgress.completedLessons[moduleId]?.length || 0;
+                const progressPercentage = totalLessonsInModule > 0 ? Math.round((completedLessonsInModule / totalLessonsInModule) * 100) : 0;
+                container.innerHTML += `<div class="module-progress">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem;">
+                        <h4>${moduleIndex + 1}. ${escapeHtml(module.title)}</h4>
+                        <span>${progressPercentage}%</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width: ${progressPercentage}%"></div></div>
+                    <div style="margin-top:.5rem; font-size:.875rem; color:var(--muted-foreground);">
+                        ${completedLessonsInModule} of ${totalLessonsInModule} lessons completed
+                    </div></div>`;
+            });
+        }
+        
+        function saveProgressToLocal() {
+            try {
+                courseProgress.lastAccessed = new Date().toISOString();
+                localStorage.setItem('courseProgress-' + ((courseData.title || 'untitled').replace(/\s+/g, '-')), JSON.stringify(courseProgress));
+            } catch (e) { console.error("Error saving progress to local storage:", e); }
+        }
+
+        function loadProgressFromLocal() {
+            try {
+                const saved = localStorage.getItem('courseProgress-' + ((courseData.title || 'untitled').replace(/\s+/g, '-')));
+                if (saved) {
+                    const loadedProgress = JSON.parse(saved);
+                    courseProgress.completedLessons = loadedProgress.completedLessons || {};
+                    courseProgress.quizScores = loadedProgress.quizScores || {};
+                    courseProgress.quizAnswers = loadedProgress.quizAnswers || {}; 
+                    courseProgress.completedModules = loadedProgress.completedModules || [];
+                } else {
+                    courseProgress = { completedLessons: {}, quizScores: {}, quizAnswers: {}, completedModules: [] };
+                }
+            } catch (e) {
+                console.error("Error loading progress:", e);
+                courseProgress = { completedLessons: {}, quizScores: {}, quizAnswers: {}, completedModules: [] };
+            }
+        }
+
+        function generateReportContentText() {
+            const studentName = document.getElementById('student-name-input')?.value.trim() || "N/A";
+            const now = new Date();
+            const timestamp = now.toLocaleString();
+            const day = String(now.getDate()).padStart(2, '0');
+            const year = now.getFullYear();
+            const hour = now.getHours();
+            const validationCode = parseInt(`${day}${year}`, 10) * hour;
+
+            const totalLessons = countTotalLessonsInExport();
+            let completedCount = 0;
+            Object.values(courseProgress.completedLessons || {}).forEach(lessons => completedCount += lessons?.length || 0);
+            const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+            const quizScoresValues = Object.values(courseProgress.quizScores || {});
+            const averageScore = quizScoresValues.length > 0 ? Math.round(quizScoresValues.reduce((sum, score) => sum + (score || 0), 0) / quizScoresValues.length) : 0;
+
+            let report = `Course Progress Report\n=====================\nStudent Name: ${studentName}\nCourse: ${escapeHtml(courseData.title || 'Untitled Course')}\nReport Generated: ${timestamp}\nValidation Code: ${validationCode}\n\nOverall Progress: ${progressPercentage}%\nCompleted Lessons: ${completedCount} of ${totalLessons}\nAverage Quiz Score: ${averageScore}% across ${quizScoresValues.length} quizzes\n\nModule Progress:\n--------------\n`;
+            courseData.modules.forEach((module, moduleIndex) => {
+                const moduleId = `module-${moduleIndex}`;
+                const totalLessonsInModule = module.lessons?.length || 0;
+                const completedLessonsInModule = courseProgress.completedLessons[moduleId]?.length || 0;
+                const moduleProgressPercentage = totalLessonsInModule > 0 ? Math.round((completedLessonsInModule / totalLessonsInModule) * 100) : 0;
+                report += `\n${moduleIndex + 1}. ${escapeHtml(module.title)}: ${moduleProgressPercentage}% (${completedLessonsInModule} of ${totalLessonsInModule} lessons)\n`;
+                (module.lessons || []).forEach((lesson, lessonIndex) => {
+                    const lessonId = `lesson-${lessonIndex}`;
+                    const isCompleted = courseProgress.completedLessons[moduleId]?.includes(lessonId) || false;
+                    const quizScore = courseProgress.quizScores[`${moduleId}-${lessonId}`];
+                    report += `   - ${isCompleted ? '✓' : '○'} ${escapeHtml(lesson.title)}`;
+                    if (quizScore !== undefined && quizScore !== null) report += ` (Quiz Score: ${quizScore}%)`;
+                    report += `\n`;
+                });
+            });
+            return report;
+        }
+
+        function printProgressReport() {
+            const studentNameInput = document.getElementById('student-name-input');
+            const studentNamePrintDiv = document.getElementById('student-name-print');
+            if (studentNameInput && studentNamePrintDiv) {
+                studentNamePrintDiv.textContent = studentNameInput.value ? `Student Name: ${escapeHtml(studentNameInput.value)}` : '';
+                studentNamePrintDiv.style.display = studentNameInput.value ? 'block' : 'none';
+            }
+            window.print();
+             if (studentNamePrintDiv) {
+                setTimeout(() => { studentNamePrintDiv.style.display = 'none'; }, 500);
+            }
+        }
+        function exportProgressReportText() {
+            const reportContent = generateReportContentText();
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const studentNamePart = (document.getElementById('student-name-input')?.value.trim() || 'student').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+            link.download = `${(courseData.title || 'course').replace(/[^a-z0-9]/gi, '-').toLowerCase()}-progress-${studentNamePart}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgressFromLocal();
+            updateCheckboxesOnLoad();
+            updateProgressUI();
+            generateModuleProgressUI(); 
+
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    tabContents.forEach(content => {
+                        content.style.display = content.id === tabId + '-tab' ? 'block' : 'none';
+                    });
+                });
+            });
+            if (tabs.length > 0 && tabContents.length > 0) {
+                tabs[0].classList.add('active');
+                tabContents[0].style.display = 'block';
+            }
+
+            document.querySelectorAll('.module-header').forEach((header, index) => {
+                header.setAttribute('data-module-id', index); 
+                header.onclick = () => toggleModule(index);
+            });
+            
+            const closeBtn = document.getElementById('quiz-modal-close-button');
+            if(closeBtn) closeBtn.onclick = closeQuiz;
+        });
+    </script>
+</body></html>

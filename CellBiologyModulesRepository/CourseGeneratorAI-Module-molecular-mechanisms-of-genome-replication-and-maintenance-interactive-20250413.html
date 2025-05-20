@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molecular Mechanisms of Genome Replication and Maintenance</title>
+  <style>
+    /* Base styles */
+    :root {
+      --primary: #0070f3;
+      --primary-foreground: #ffffff;
+      --background: #ffffff;
+      --foreground: #000000;
+      --muted: #f5f5f5;
+      --muted-foreground: #6b7280;
+      --border: #e5e7eb;
+      --accent: #f3f4f6;
+      --accent-foreground: #111827;
+      --destructive: #ef4444;
+      --destructive-foreground: #ffffff;
+      --success: #10b981;
+      --success-foreground: #ffffff;
+      --radius: 0.5rem;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--foreground);
+      background-color: var(--background);
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Style to hide scrollbars when modal is open */
+    body.modal-open {
+        overflow: hidden;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+      /* Allow container to be hidden */
+      transition: opacity 0.3s ease, filter 0.3s ease;
+    }
+
+    body.modal-open .container {
+        opacity: 0.3; /* Dim background */
+        filter: blur(4px); /* Blur background */
+        pointer-events: none; /* Prevent interaction with background */
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    
+    h1 { font-size: 2.25rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+    
+    p { margin-bottom: 1rem; }
+    
+    ul, ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+    
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    a:hover { text-decoration: underline; }
+    
+    button {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      font-weight: 500;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background-color: var(--background);
+      color: var(--foreground);
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    }
+    
+    button:hover { background-color: var(--accent); }
+    
+    button.primary {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+    
+    button.primary:hover { background-color: #0060df; }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    input[type="text"] {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
+    }
+    
+    /* Layout components */
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      margin-bottom: 2rem;
+    }
+    
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background-color: var(--accent);
+    }
+    
+    .card-content { padding: 1.5rem; }
+    
+    .card-footer {
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+      justify-content: flex-end;
+      align-items: center; /* Align items vertically */
+      gap: 0.75rem; /* Increased gap */
+    }
+    
+    /* Navigation */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    
+    .tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s; /* Added transition */
+    }
+    
+    .tab.active {
+      border-bottom-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    /* Course specific */
+    .course-header { margin-bottom: 2rem; }
+    .course-title { font-size: 2rem; margin-bottom: 0.5rem; }
+    .course-description { color: var(--muted-foreground); margin-bottom: 1.5rem; }
+    
+    .learning-objectives {
+      background-color: var(--muted);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+    }
+    
+    .module {
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden; /* Keep this */
+    }
+    
+    .module-header {
+      background-color: var(--muted);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s; /* Added transition */
+    }
+    .module-header:hover { background-color: var(--accent); } /* Added hover effect */
+
+    .module-toggle {
+        transition: transform 0.3s ease; /* Smooth arrow rotation */
+    }
+
+    .module-content {
+      padding: 0 1.5rem;
+      /* Added transition for smooth collapse/expand */
+      max-height: 0;
+      overflow: hidden; /* Keep hidden until expanded */
+      transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+    }
+    .module-content.visible {
+        /* FIX: Increased max-height significantly */
+        max-height: 10000px; /* Large value to accommodate long content */
+        padding: 1.5rem;
+        transition: max-height 0.5s ease-in, padding 0.5s ease-in;
+        overflow: visible; /* Allow content to overflow if somehow needed, though unlikely with large max-height */
+    }
+
+    .lesson {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .lesson:last-child { border-bottom: none; }
+    
+    .lesson-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .lesson-title { display: flex; align-items: center; }
+    
+    .lesson-number {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      margin-right: 0.75rem;
+      font-size: 0.875rem;
+    }
+    
+    .lesson-content { margin-bottom: 1.5rem; }
+    .activities, .resources { margin-top: 1.5rem; }
+    
+    /* Quiz styles (Now primarily for modal content) */
+    .quiz-container { /* Container within the modal */
+        background-color: var(--muted);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        max-height: calc(100% - 80px); /* Adjust based on modal header/footer */
+        overflow-y: auto; /* Allow scrolling within the quiz content */
+    }
+    
+    .quiz-title { font-size: 1.25rem; margin-bottom: 1rem; }
+    .quiz-question { margin-bottom: 1.5rem; }
+    .quiz-options { list-style-type: none; padding-left: 0; }
+    
+    .quiz-option {
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    
+    .quiz-option:hover { background-color: var(--accent); }
+    
+    .quiz-option.selected {
+      border-color: var(--primary);
+      background-color: rgba(0, 112, 243, 0.1);
+    }
+    
+    .quiz-option.correct {
+      border-color: var(--success);
+      background-color: rgba(16, 185, 129, 0.1);
+      font-weight: bold;
+    }
+    
+    .quiz-option.incorrect {
+      border-color: var(--destructive);
+      background-color: rgba(239, 68, 68, 0.1);
+      text-decoration: line-through;
+    }
+    
+    .quiz-explanation {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 0.25rem;
+      display: none;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .quiz-explanation.visible { display: block; }
+    
+    .quiz-progress {
+      height: 0.5rem;
+      background-color: var(--border);
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    
+    .quiz-progress-bar {
+      height: 100%;
+      background-color: var(--primary);
+      transition: width 0.3s ease;
+    }
+    
+    .quiz-result {
+      text-align: center;
+      padding: 2rem;
+      display: none;
+      border-top: 1px solid var(--border);
+      margin-top: 1.5rem;
+    }
+    
+    .quiz-result.visible { display: block; }
+    
+    .quiz-score { font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }
+
+    /* Take Quiz Button */
+    .take-quiz-button {
+        margin-top: 1.5rem;
+        background-color: var(--primary);
+        color: var(--primary-foreground);
+        border-color: var(--primary);
+    }
+    .take-quiz-button:hover {
+        background-color: #0060df;
+    }
+
+    /* Quiz Modal Styles */
+    .quiz-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        display: none; /* Hidden by default */
+        align-items: center;
+        justify-content: center;
+        z-index: 1000; /* Ensure it's on top */
+        padding: 1rem; /* Padding around the modal content */
+        opacity: 0; /* Start hidden for transition */
+        transition: opacity 0.3s ease;
+    }
+
+    .quiz-modal.visible {
+        display: flex; /* Use flex for centering */
+        opacity: 1;
+    }
+
+    .quiz-modal-content {
+        background-color: var(--background);
+        padding: 2rem;
+        border-radius: var(--radius);
+        max-width: 800px; /* Limit modal width */
+        width: 90%; /* Responsive width */
+        max-height: 90vh; /* Limit modal height */
+        display: flex;
+        flex-direction: column;
+        position: relative; /* For close button positioning */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .quiz-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .quiz-modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0; /* Remove default heading margin */
+    }
+
+    .quiz-modal-close-button {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+        color: var(--muted-foreground);
+        padding: 0.25rem;
+    }
+    .quiz-modal-close-button:hover {
+        color: var(--foreground);
+    }
+
+    .quiz-modal-body {
+        overflow-y: auto; /* Enable scrolling for quiz content */
+        flex-grow: 1; /* Allow body to take available space */
+    }
+    
+    /* Progress tracking */
+    .progress-card { margin-bottom: 1.5rem; }
+    
+    .progress-bar {
+      height: 0.5rem;
+      background-color: var(--border);
+      border-radius: 9999px;
+      margin: 0.5rem 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--primary);
+      transition: width 0.3s ease;
+    }
+    
+    .module-progress {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    
+    .checkbox-label { /* Style the checkbox label */
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .checkbox {
+      appearance: none;
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      margin-right: 0.5rem;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s; /* Added transition */
+    }
+    
+    .checkbox:checked {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .checkbox:checked::after {
+      content: '';
+      position: absolute;
+      left: 5px; /* Adjusted for centering */
+      top: 2px;  /* Adjusted for centering */
+      width: 3px;
+      height: 7px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    
+    /* Table of contents */
+    .toc {
+      background-color: var(--muted);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+    }
+    
+    .toc-list { list-style-type: none; padding-left: 0; }
+    .toc-module { margin-bottom: 1rem; }
+    .toc-lessons { list-style-type: none; padding-left: 1.5rem; margin-top: 0.5rem; }
+    .toc-lesson { margin-bottom: 0.25rem; }
+    
+    /* Utility classes */
+    .flex { display: flex; }
+    .justify-between { justify-content: space-between; }
+    .items-center { align-items: center; }
+    .gap-2 { gap: 0.5rem; }
+    
+    /* Print styles */
+    @media print {
+      body, html {
+          background-color: #fff !important; /* Ensure white background */
+          color: #000 !important; /* Ensure black text */
+          -webkit-print-color-adjust: exact; /* Ensure backgrounds print in Chrome/Safari */
+          print-color-adjust: exact; /* Standard */
+      }
+
+      body.modal-open { overflow: auto !important; } /* Allow scrolling for print */
+      body.modal-open .container { opacity: 1 !important; filter: none !important; pointer-events: auto !important; } /* Show main content */
+      
+      /* Hide elements not meant for printing */
+      .header, .tabs, .toc, .module-header, .quiz-modal, button, input[type="text"], .activities, .resources, .card-footer, .lesson-header label {
+        display: none !important;
+      }
+
+      /* Show only the progress tab content when printing */
+      #content-tab { display: none !important; }
+      #progress-tab { display: block !important; }
+
+      /* Style the progress tab content for printing */
+      .container { max-width: 100% !important; padding: 0 !important; margin: 1cm !important; }
+      .card { border: none !important; box-shadow: none !important; margin-bottom: 1rem !important; page-break-inside: avoid !important; }
+      .card-header { background-color: transparent !important; padding: 0 0 0.5rem 0 !important; border-bottom: 1px solid #ccc !important; }
+      .card-content { padding: 0.5rem 0 !important; }
+      h2 { font-size: 1.5rem !important; margin-top: 1rem !important; }
+      h3 { font-size: 1.2rem !important; margin-top: 0.5rem !important; }
+      .progress-bar { border: 1px solid #ccc !important; background-color: #eee !important; height: 1rem !important; }
+      .progress-bar-fill { background-color: #999 !important; } /* Use gray for progress bar fill */
+      .module-progress { border: 1px solid #eee !important; padding: 0.5rem !important; }
+      #student-name-print { display: block; margin-bottom: 1rem; font-weight: bold; } /* Style for printed name */
+
+      /* Ensure all text is black */
+      * { color: #000 !important; }
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .container { padding: 0.5rem; }
+      .card-header, .card-content, .card-footer { padding: 1rem; }
+      .card-footer { flex-direction: column; align-items: flex-end; } /* Stack footer items */
+      .lesson { padding: 1rem; }
+      h1 { font-size: 1.75rem; }
+      h2 { font-size: 1.5rem; }
+      h3 { font-size: 1.25rem; }
+      .tabs { font-size: 0.875rem; } /* Adjust tab font size */
+      .tab { padding: 0.5rem 1rem; }
+      .quiz-modal-content { width: 95%; padding: 1.5rem; }
+      .quiz-modal-title { font-size: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="course-title">Molecular Mechanisms of Genome Replication and Maintenance</h1>
+      <p class="course-description">This course explores the fundamental processes of DNA replication, cell cycle control, and genome maintenance. Students will investigate the molecular machinery and mechanisms involved in accurate DNA duplication, the regulation of the cell cycle, and the pathways that repair damaged DNA and facilitate genetic recombination.</p>
+    </div>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="content">Course Content</div>
+      <div class="tab" data-tab="progress">Your Progress</div>
+    </div>
+    
+    <div class="tab-content active" id="content-tab">
+      <div class="toc">
+        <h2>Table of Contents</h2>
+        <ul class="toc-list">
+          <li class="toc-module">
+            <strong>1. DNA Replication: Mechanisms and Characteristics</strong>
+            <ul class="toc-lessons">
+              <li class="toc-lesson"><a href="#lesson-0-0">1.1 Characteristics of Chromosome Replication</a></li>
+              <li class="toc-lesson"><a href="#lesson-0-1">1.2 Replication Machinery and Mechanisms</a></li>
+            </ul>
+          </li>
+          <li class="toc-module">
+            <strong>2. Replication, the Cell Cycle, and DNA Integrity</strong>
+            <ul class="toc-lessons">
+              <li class="toc-lesson"><a href="#lesson-1-0">2.1 Replication and the Cell Cycle</a></li>
+              <li class="toc-lesson"><a href="#lesson-1-1">2.2 Replication Errors and DNA Damage</a></li>
+            </ul>
+          </li>
+          <li class="toc-module">
+              <strong>3. DNA Repair Mechanisms</strong>
+              <ul class="toc-lessons">
+                <li class="toc-lesson"><a href="#lesson-2-0">3.1 DNA Repair Systems</a></li>
+                <li class="toc-lesson"><a href="#lesson-2-1">3.2 Consequences of Replication Errors and DNA Damage</a></li>
+              </ul>
+            </li>
+          <li class="toc-module">
+              <strong>4. Homologous Recombination</strong>
+              <ul class="toc-lessons">
+                <li class="toc-lesson"><a href="#lesson-3-0">4.1 Homologous Recombination: Definition and Mechanism</a></li>
+                <li class="toc-lesson"><a href="#lesson-3-1">4.2 Functions of Homologous Recombination</a></li>
+              </ul>
+            </li>
+        </ul>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><h2>Learning Objectives</h2></div>
+        <div class="card-content">
+          <ul>
+            <li>Describe the key characteristics of DNA replication, including its semiconservative nature, bidirectionality, and origin specificity.</li>
+            <li>Explain the roles of various enzymes and proteins involved in DNA replication, such as DNA polymerases, helicases, and ligases.</li>
+            <li>Analyze the integration of DNA replication with the cell cycle and the importance of cell cycle checkpoints.</li>
+            <li>Compare and contrast different DNA repair mechanisms, including mismatch repair, excision repair, and end-joining repair.</li>
+            <li>Explain the mechanism and function of homologous recombination in DNA repair and genetic diversity.</li>
+          </ul>
+        </div>
+      </div>
+      
+      <h2>Course Modules</h2>
+      
+      <div class="module" data-module-id="0">
+        <div class="module-header" onclick="toggleModule(0)">
+          <h3>1. DNA Replication: Mechanisms and Characteristics</h3>
+          <span class="module-toggle">▼</span>
+        </div>
+        <div class="module-content" id="module-0">
+          <p class="module-description">This module explores the fundamental characteristics of DNA replication and the intricate molecular machinery that ensures accurate genome duplication.</p>
+          <div class="lesson" id="lesson-0-0">
+            <div class="lesson-header">
+              <div class="lesson-title"><span class="lesson-number">1.1</span><h4>Characteristics of Chromosome Replication</h4></div>
+              <div><label class="checkbox-label"><input type="checkbox" class="checkbox lesson-checkbox" data-module-id="0" data-lesson-id="0" onchange="toggleLessonCompletion(0, 0, this.checked)"> Mark as completed</label></div>
+            </div>
+            <div class="lesson-content">
+              <p>DNA replication is a fundamental process ensuring the faithful duplication of the genome before cell division. This process is characterized by several key features, beginning with its semiconservative nature. Semiconservative replication means that each newly synthesized DNA molecule consists of one original (parental) strand and one newly synthesized strand. This was experimentally proven by the Meselson-Stahl experiment using isotopes of nitrogen. The implications of this mechanism are profound, ensuring that each daughter cell inherits a complete and largely error-free copy of the genetic information. Furthermore, replication is typically bidirectional, originating from specific sites known as origins of replication. These origins are characterized by specific DNA sequences recognized by initiator proteins, leading to the formation of replication forks that move in opposite directions. Bidirectional replication speeds up the replication process, allowing for the efficient duplication of large genomes. Eukaryotic chromosomes contain multiple origins of replication to further accelerate this process.</p><p>The initiation of replication at origins is a tightly regulated process. In eukaryotes, the Origin Recognition Complex (ORC) binds to origins and serves as a platform for the assembly of other replication proteins. The timing of origin activation is also carefully controlled to ensure that replication occurs only once per cell cycle. The location and activation of origins can vary across different cell types and developmental stages. The accuracy of DNA replication is paramount, and cells have evolved elaborate mechanisms to minimize errors. DNA polymerases possess proofreading activity, which allows them to detect and correct mismatched base pairs. Additionally, mismatch repair systems further enhance the fidelity of replication by correcting errors that escape the proofreading mechanism.</p><p>Consider the case of telomeres, the protective caps at the ends of chromosomes. Due to the nature of DNA replication by DNA polymerase, the lagging strand cannot be fully replicated at the very end of the chromosome, leading to a gradual shortening of telomeres with each cell division. This is known as the end-replication problem. Cells have evolved a specialized enzyme called telomerase, which extends telomeres, preventing the loss of genetic information and contributing to cellular immortality in certain cell types, such as stem cells and cancer cells. Understanding the characteristics of chromosome replication is crucial for understanding genome stability and the mechanisms that prevent mutations and maintain cellular function.</p>
+            </div>
+            <div class="activities"><h5>Activities</h5><ul><li>Analyze the Meselson-Stahl experiment and its implications for understanding semiconservative replication.</li><li>Compare and contrast the mechanisms of origin recognition and activation in prokaryotes and eukaryotes.</li></ul></div>
+            <div class="resources"><h5>Resources</h5><ul><li>Review articles on the Meselson-Stahl experiment.</li><li>Textbook chapters on DNA replication and origins of replication.</li><li>Animations illustrating bidirectional DNA replication.</li></ul></div>
+            <button class="take-quiz-button" onclick="startQuiz(0, 0)">Take Quiz 1.1</button>
+          </div>
+          <div class="lesson" id="lesson-0-1">
+            <div class="lesson-header">
+              <div class="lesson-title"><span class="lesson-number">1.2</span><h4>Replication Machinery and Mechanisms</h4></div>
+              <div><label class="checkbox-label"><input type="checkbox" class="checkbox lesson-checkbox" data-module-id="0" data-lesson-id="1" onchange="toggleLessonCompletion(0, 1, this.checked)"> Mark as completed</label></div>
+            </div>
+            <div class="lesson-content">
+                <p>DNA replication is orchestrated by a complex molecular machinery, a replisome, involving numerous proteins that work in a coordinated manner to accurately and efficiently duplicate the genome. The process begins with the Origin Recognition Complex (ORC) binding to specific DNA sequences at the origins of replication. This initiates the recruitment of other proteins, including helicase, which unwinds the double helix, separating the two DNA strands and creating a replication fork. Single-stranded DNA binding proteins (SSBPs) then bind to the separated strands to prevent them from re-annealing and forming secondary structures that could impede replication. Primase synthesizes short RNA primers, providing a 3'-OH group for DNA polymerase to initiate DNA synthesis. The leading strand is synthesized continuously in the 5' to 3' direction, while the lagging strand is synthesized discontinuously in short fragments called Okazaki fragments. These fragments are synthesized in the opposite direction of the replication fork movement.</p><p>DNA polymerases are the central enzymes in DNA replication, responsible for adding nucleotides to the growing DNA strand. Different DNA polymerases perform specialized functions, including initiation, elongation, and proofreading. DNA polymerase III is the main enzyme responsible for elongation in prokaryotes, while eukaryotes utilize multiple DNA polymerases (alpha, delta, epsilon) for replication. These polymerases possess remarkable fidelity, ensuring that the correct nucleotide is incorporated at each position. DNA ligase then joins the Okazaki fragments on the lagging strand, creating a continuous DNA strand. Topoisomerases relieve the torsional stress generated by the unwinding of DNA by helicase, preventing DNA supercoiling and tangling. The coordinated action of these enzymes ensures efficient and accurate DNA replication.</p><p>Consider the case study of mutations in DNA polymerase genes. Mutations affecting the proofreading domain of DNA polymerase can lead to a significant increase in the mutation rate, resulting in genomic instability and potentially contributing to the development of cancer. For instance, mutations in the POLE and POLD1 genes, encoding DNA polymerases epsilon and delta respectively, are frequently found in various types of cancer. Understanding the roles and mechanisms of the replication machinery is critical for understanding how DNA replication is regulated and how errors in replication can lead to disease. Furthermore, many antiviral and anticancer drugs target components of the replication machinery, highlighting the importance of this process in human health.</p>
+            </div>
+            <div class="activities"><h5>Activities</h5><ul><li>Create a diagram illustrating the components of the replisome and their functions.</li><li>Research the roles of different DNA polymerases in prokaryotic and eukaryotic replication.</li></ul></div>
+            <div class="resources"><h5>Resources</h5><ul><li>Animations of DNA replication showing the function of each protein.</li><li>Research articles on the structure and function of DNA polymerases.</li><li>Textbook chapters on DNA replication enzymes and their mechanisms.</li></ul></div>
+             <button class="take-quiz-button" onclick="startQuiz(0, 1)">Take Quiz 1.2</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="module" data-module-id="1">
+        <div class="module-header" onclick="toggleModule(1)">
+          <h3>2. Replication, the Cell Cycle, and DNA Integrity</h3>
+          <span class="module-toggle">▼</span>
+        </div>
+        <div class="module-content" id="module-1">
+          <p class="module-description">This module examines the integration of DNA replication with the cell cycle and the critical role of checkpoints in maintaining genomic integrity.</p>
+          <div class="lesson" id="lesson-1-0">
+            <div class="lesson-header">
+              <div class="lesson-title"><span class="lesson-number">2.1</span><h4>Replication and the Cell Cycle</h4></div>
+              <div><label class="checkbox-label"><input type="checkbox" class="checkbox lesson-checkbox" data-module-id="1" data-lesson-id="0" onchange="toggleLessonCompletion(1, 0, this.checked)"> Mark as completed</label></div>
+            </div>
+            <div class="lesson-content">
+                <p>DNA replication is meticulously coordinated with the cell cycle to ensure accurate genome duplication and segregation. The S phase of the cell cycle is dedicated to DNA replication, and progression through this phase is tightly regulated by a complex network of proteins. Cyclins and cyclin-dependent kinases (CDKs) are central to this regulation. Cyclins, whose levels fluctuate during the cell cycle, bind to and activate CDKs. This activation leads to the phosphorylation of target proteins that drive the cell cycle forward. Different cyclin-CDK complexes are active at different stages of the cell cycle, ensuring that each phase occurs in the correct order and at the appropriate time. For example, S-phase cyclin-CDK complexes initiate DNA replication by activating the origin recognition complex (ORC) and recruiting other replication factors to the origins of replication.</p><p>Furthermore, checkpoints within the cell cycle monitor the completion and accuracy of DNA replication. The S-phase checkpoint, for instance, ensures that DNA replication is complete before the cell enters mitosis. If DNA replication is stalled or incomplete due to errors or damage, the checkpoint pathway is activated, inhibiting the activity of cyclin-CDK complexes that promote entry into mitosis. This allows time for the cell to repair the DNA damage or complete replication before proceeding with cell division. This intricate interplay between DNA replication and the cell cycle is crucial for maintaining genomic stability and preventing the propagation of errors to daughter cells.</p>
+            </div>
+            <div class="activities"><h5>Activities</h5><ul><li>Create a diagram illustrating the different phases of the cell cycle and the corresponding cyclin-CDK complexes that regulate each phase.</li><li>Research and present on the role of the origin recognition complex (ORC) in initiating DNA replication.</li></ul></div>
+            <div class="resources"><h5>Resources</h5><ul><li>Lodish et al., Molecular Cell Biology (8th edition), Chapter 14: The Eukaryotic Cell Cycle</li><li>Alberts et al., Molecular Biology of the Cell (6th edition), Chapter 17: The Cell Cycle</li></ul></div>
+            <button class="take-quiz-button" onclick="startQuiz(1, 0)">Take Quiz 2.1</button>
+          </div>
+          <div class="lesson" id="lesson-1-1">
+            <div class="lesson-header">
+              <div class="lesson-title"><span class="lesson-number">2.2</span><h4>Replication Errors and DNA Damage</h4></div>
+              <div><label class="checkbox-label"><input type="checkbox" class="checkbox lesson-checkbox" data-module-id="1" data-lesson-id="1" onchange="toggleLessonCompletion(1, 1, this.checked)"> Mark as completed</label></div>
+            </div>
+            <div class="lesson-content">
+                <p>Despite the high fidelity of DNA replication, errors can still occur. DNA polymerases possess proofreading activity, which allows them to correct mistakes during replication. However, this proofreading mechanism is not perfect, and some errors can escape detection. Furthermore, spontaneous chemical changes, such as deamination and depurination, can alter the structure of DNA bases. Environmental factors, including ultraviolet (UV) radiation, ionizing radiation, and exposure to certain chemicals, can also cause DNA damage. UV radiation can induce the formation of pyrimidine dimers, while ionizing radiation can cause DNA strand breaks. Chemical mutagens can modify DNA bases, leading to mispairing during replication.</p><p>Cells have evolved various DNA repair mechanisms to counteract these errors and damage. These repair pathways include mismatch repair, base excision repair, nucleotide excision repair, and non-homologous end joining. Mismatch repair corrects errors that escape proofreading during replication. Base excision repair removes damaged or modified bases. Nucleotide excision repair removes bulky DNA lesions, such as pyrimidine dimers. Non-homologous end joining repairs double-strand breaks, but it is error-prone and can lead to insertions or deletions. The choice of repair pathway depends on the type of DNA damage. Failure to repair DNA damage can lead to mutations, which can contribute to cancer development and other diseases.</p>
+            </div>
+            <div class="activities"><h5>Activities</h5><ul><li>Compare and contrast the different DNA repair pathways, including their mechanisms and the types of DNA damage they repair.</li><li>Research and present on a specific human disease caused by defects in a DNA repair pathway (e.g., Xeroderma pigmentosum).</li></ul></div>
+            <div class="resources"><h5>Resources</h5><ul><li>Alberts et al., Molecular Biology of the Cell (6th edition), Chapter 12: DNA Replication, Repair, and Recombination</li><li>Lodish et al., Molecular Cell Biology (8th edition), Chapter 12: DNA Maintenance</li></ul></div>
+            <button class="take-quiz-button" onclick="startQuiz(1, 1)">Take Quiz 2.2</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="module" data-module-id="2">
+        <div class="module-header" onclick="toggleModule(2)">
+          <h3>3. DNA Repair Mechanisms</h3>
+          <span class="module-toggle">▼</span>
+        </div>
+        <div class="module-content" id="module-2">
+          <p class="module-description">This module explores the various DNA repair mechanisms that cells utilize to correct replication errors and repair DNA damage.</p>
+          <div class="lesson" id="lesson-2-0">
+            <div class="lesson-header">
+              <div class="lesson-title"><span class="lesson-number">3.1</span><h4>DNA Repair Systems</h4></div>
+              <div><label class="checkbox-label"><input type="checkbox" class="checkbox lesson-checkbox" data-module-id="2" data-lesson-id="0" onchange="toggleLessonCompletion(2, 0, this.checked)"> Mark as completed</label></div>
+            </div>
+            <div class="lesson-content">
+                <p>Cells employ several DNA repair mechanisms to maintain genomic integrity. These systems can be broadly categorized into direct reversal, excision repair, mismatch repair, and double-strand break repair. Direct reversal is the simplest, directly correcting certain types of damage, such as the removal of methyl groups from guanine bases by enzymes like methylguanine methyltransferase (MGMT). Excision repair encompasses base excision repair (BER) and nucleotide excision repair (NER). BER removes damaged or modified single bases, initiating with a DNA glycosylase that cleaves the base from the deoxyribose sugar, followed by AP endonuclease activity and subsequent repair synthesis. NER handles bulky, helix-distorting lesions like pyrimidine dimers induced by UV radiation. It involves recognition of the distortion, incision flanking the damage, removal of the damaged strand, and gap filling by DNA polymerase and ligation. Mismatch repair (MMR) corrects single base pair mismatches and small insertion/deletion loops that arise during DNA replication. In E. coli, the MutS, MutL, and MutH proteins are key players, with MutH cleaving the newly synthesized strand at a GATC site. In eukaryotes, homologs of MutS and MutL are involved. Finally, double-strand break repair (DSBR) addresses severe DNA damage involving breaks in both DNA strands. The two major DSBR pathways are homologous recombination (HR) and non-homologous end joining (NHEJ). HR uses a homologous DNA template to accurately repair the break, while NHEJ directly ligates the broken ends, often introducing small insertions or deletions.</p><p>Each repair pathway involves a complex interplay of proteins and enzymes. The choice of repair pathway depends on the type of damage, the cell cycle stage, and the availability of a homologous template. For instance, HR is more frequent in S and G2 phases when a sister chromatid is available as a template, while NHEJ can occur throughout the cell cycle but is more error-prone. The efficiency and accuracy of these repair systems are crucial for preventing mutations and maintaining genomic stability. Failure of these systems can lead to the accumulation of mutations and increased risk of cancer and other diseases. The complexity of these pathways provides multiple targets for therapeutic intervention, particularly in cancer treatment where targeting DNA repair mechanisms can enhance the effectiveness of chemotherapy or radiation therapy.</p><p>Furthermore, the regulation of these repair pathways is tightly linked to cell cycle checkpoints. As indicated in the lecture notes, the G1 and G2 checkpoints monitor DNA integrity and can halt the cell cycle if DNA damage is detected. This allows time for repair mechanisms to operate before DNA replication or cell division proceeds. For example, activation of the ATM/ATR kinase pathway in response to DNA damage triggers cell cycle arrest and activates downstream repair pathways. The p53 tumor suppressor protein plays a central role in this process, inducing cell cycle arrest, DNA repair, or apoptosis depending on the severity of the damage. The interplay between DNA repair and cell cycle control is essential for maintaining genomic stability and preventing the propagation of damaged DNA.</p>
+            </div>
+            <div class="activities"><h5>Activities</h5><ul><li>Compare and contrast the mechanisms of BER and NER.</li><li>Explain the roles of key proteins involved in mismatch repair and double-strand break repair.</li></ul></div>
+            <div class="resources"><h5>Resources</h5><ul><li>Lodish et al., Molecular Cell Biology, 8th edition, Chapter 12: DNA Replication, Repair, and Recombination.</li><li>Alberts et al., Molecular Biology of the Cell, 6th edition, Chapter 5: DNA Replication, Repair, and Recombination.</li></ul></div>
+            <button class="take-quiz-button" onclick="startQuiz(2, 0)">Take Quiz 3.1</button>
+          </div>
+          <div class="lesson" id="lesson-2-1">
+            <div class="lesson-header">
+              <div class="lesson-title"><span class="lesson-number">3.2</span><h4>Consequences of Replication Errors and DNA Damage</h4></div>
+              <div><label class="checkbox-label"><input type="checkbox" class="checkbox lesson-checkbox" data-module-id="2" data-lesson-id="1" onchange="toggleLessonCompletion(2, 1, this.checked)"> Mark as completed</label></div>
+            </div>
+            <div class="lesson-content">
+                <p>While cells possess robust DNA repair mechanisms, errors and damage can still persist. The consequences of these unrepaired alterations range from subtle phenotypic changes to severe cellular dysfunction and disease. A low level of spontaneous mutations is a natural part of evolution, providing the raw material for adaptation and diversification. However, an elevated mutation rate, driven by unrepaired DNA damage, can have detrimental effects. Accumulation of mutations in critical genes, particularly those involved in cell cycle control, DNA repair, or signal transduction, is a hallmark of cancer. For example, mutations in tumor suppressor genes like p53 or BRCA1/2 can disable their protective functions, leading to uncontrolled cell growth and tumor formation. The accumulation of mutations is not limited to cancer; it also contributes to aging and age-related diseases. As cells accumulate DNA damage over time, their function declines, leading to tissue degeneration and increased susceptibility to age-related disorders.</p><p>Excessive DNA damage can also trigger programmed cell death, or apoptosis. This is a crucial mechanism for eliminating cells with irreparable DNA damage, preventing the propagation of potentially harmful mutations. Activation of apoptosis pathways is often mediated by the p53 protein, which can sense DNA damage and initiate a cascade of events leading to cell death. However, if apoptosis is impaired, cells with damaged DNA may survive and proliferate, increasing the risk of cancer. Furthermore, DNA damage can affect gene expression and cellular function even if it does not directly lead to mutations. For example, DNA damage can alter chromatin structure, affecting the accessibility of genes to transcription factors. This can lead to aberrant gene expression patterns and cellular dysfunction. The impact of DNA damage on cellular function is complex and multifaceted, highlighting the importance of maintaining genomic integrity.</p><p>Consider the case of Xeroderma Pigmentosum (XP), a rare genetic disorder characterized by extreme sensitivity to UV radiation. Individuals with XP have mutations in genes involved in NER, rendering them unable to repair UV-induced DNA damage effectively. This leads to a dramatically increased risk of skin cancer. Another example is Lynch syndrome (Hereditary Non-Polyposis Colorectal Cancer, HNPCC), caused by mutations in mismatch repair genes. Individuals with Lynch syndrome have a higher risk of developing colorectal cancer and other cancers due to the accumulation of replication errors. These examples illustrate the critical role of DNA repair in preventing cancer and other diseases. The study of these genetic disorders has provided valuable insights into the mechanisms of DNA repair and the consequences of its failure.</p>
+            </div>
+            <div class="activities"><h5>Activities</h5><ul><li>Discuss the role of p53 in responding to DNA damage.</li><li>Research and present on a specific genetic disorder caused by a defect in a DNA repair pathway (e.g., Ataxia Telangiectasia).</li></ul></div>
+            <div class="resources"><h5>Resources</h5><ul><li>Vogelstein et al., 'Cancer genome landscapes.' Science 339, 1546–1558 (2013).</li><li>Hanawalt, P.C. 'DNA repair comes of age.' Nat Struct Mol Biol 9, 844–846 (2002).</li></ul></div>
+            <button class="take-quiz-button" onclick="startQuiz(2, 1)">Take Quiz 3.2</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="module" data-module-id="3">
+        <div class="module-header" onclick="toggleModule(3)">
+          <h3>4. Homologous Recombination</h3>
+          <span class="module-toggle">▼</span>
+        </div>
+        <div class="module-content" id="module-3">
+          <p class="module-description">This module examines the process of homologous recombination, its mechanisms, and its role in DNA repair and genetic diversity.</p>
+          <div class="lesson" id="lesson-3-0">
+            <div class="lesson-header">
+              <div class="lesson-title"><span class="lesson-number">4.1</span><h4>Homologous Recombination: Definition and Mechanism</h4></div>
+              <div><label class="checkbox-label"><input type="checkbox" class="checkbox lesson-checkbox" data-module-id="3" data-lesson-id="0" onchange="toggleLessonCompletion(3, 0, this.checked)"> Mark as completed</label></div>
+            </div>
+            <div class="lesson-content">
+                <p>Homologous recombination (HR) is a fundamental process where genetic material is exchanged between two DNA molecules that share similar or identical sequences. This exchange is crucial for maintaining genomic stability, repairing damaged DNA, and promoting genetic diversity. HR is a highly conserved process, found in both prokaryotic and eukaryotic cells, highlighting its essential role in cellular life. The process relies on the ability of cells to recognize and align homologous DNA sequences, facilitating the precise exchange of genetic information. Without HR, cells would be significantly more vulnerable to DNA damage and would lack the ability to efficiently generate genetic diversity through sexual reproduction.</p><p>The Holliday model, proposed by Robin Holliday, provides a foundational understanding of the mechanism of HR. The process begins with a single-strand break, or nick, in one of the homologous DNA molecules. This nick serves as the entry point for strand invasion. The broken strand then invades the other homologous DNA molecule, displacing the corresponding strand and forming a heteroduplex region. This invasion is facilitated by proteins that unwind the DNA and promote strand exchange. The point where the two DNA molecules are connected is called a Holliday junction. This junction can then migrate along the DNA, extending the heteroduplex region. Resolution of the Holliday junction, through further strand breaks and ligation, leads to the separation of the two DNA molecules, potentially resulting in the exchange of genetic material. There are variations of the Holliday model, involving double-strand breaks, but the fundamental principle of strand invasion and junction formation remains consistent.</p><p>Another more comprehensive model is the Double-Strand Break Repair (DSBR) pathway. It begins with a double-strand break in one DNA molecule. This break is processed by nucleases to create single-stranded DNA tails. One of these tails invades the homologous chromosome, forming a displacement loop (D-loop). The D-loop can then be extended by DNA synthesis, using the invading strand as a primer and the homologous chromosome as a template. The extended strand can then pair with the other single-stranded tail from the original double-strand break, forming a second Holliday junction. Resolution of both Holliday junctions can lead to either crossover or non-crossover products. The DSBR pathway is particularly important for repairing double-strand breaks caused by ionizing radiation or other DNA-damaging agents.</p>
+            </div>
+            <div class="activities"><h5>Activities</h5><ul><li>Draw a step-by-step diagram illustrating the Holliday model of homologous recombination.</li><li>Compare and contrast the Holliday model with the Double-Strand Break Repair (DSBR) pathway.</li></ul></div>
+            <div class="resources"><h5>Resources</h5><ul><li>Review articles on homologous recombination mechanisms.</li><li>Animations depicting the Holliday model and DSBR pathway.</li></ul></div>
+            <button class="take-quiz-button" onclick="startQuiz(3, 0)">Take Quiz 4.1</button>
+          </div>
+          <div class="lesson" id="lesson-3-1">
+            <div class="lesson-header">
+              <div class="lesson-title"><span class="lesson-number">4.2</span><h4>Functions of Homologous Recombination</h4></div>
+              <div><label class="checkbox-label"><input type="checkbox" class="checkbox lesson-checkbox" data-module-id="3" data-lesson-id="1" onchange="toggleLessonCompletion(3, 1, this.checked)"> Mark as completed</label></div>
+            </div>
+            <div class="lesson-content">
+                <p>Homologous recombination plays several crucial roles in maintaining cellular health and promoting genetic diversity. Its primary function is as a DNA repair mechanism, particularly for double-strand breaks (DSBs). DSBs are highly detrimental to cells and can lead to chromosomal instability and cell death. HR provides a high-fidelity repair mechanism by using the homologous chromosome as a template to accurately restore the broken DNA sequence. This is particularly important in cells that have undergone DNA damage due to radiation, chemical exposure, or replication errors. Without HR, cells would rely on error-prone repair mechanisms, leading to the accumulation of mutations and increasing the risk of diseases such as cancer.</p><p>During meiosis, the specialized cell division that produces gametes (sperm and egg cells), HR is essential for generating genetic diversity through crossing over. Crossing over involves the exchange of genetic material between homologous chromosomes, resulting in new combinations of alleles. This process is crucial for ensuring that offspring inherit a unique combination of genes from their parents, contributing to the genetic diversity of populations. The Holliday junction resolution during meiosis is carefully regulated to promote crossovers and prevent non-crossovers, which can lead to loss of heterozygosity. Furthermore, HR is used in gene targeting techniques. Scientists can introduce modified DNA sequences into cells, and HR can be used to integrate these sequences into specific locations in the genome. This allows for the precise modification of genes, enabling researchers to study gene function and develop new therapies for genetic diseases.</p><p>Consider the example of BRCA1 and BRCA2 genes, which are involved in homologous recombination-mediated repair of double-strand breaks. Mutations in these genes significantly increase the risk of breast and ovarian cancer. This is because the impaired homologous recombination pathway leads to the accumulation of DNA damage and genomic instability, ultimately driving cancer development. Another example is the use of CRISPR-Cas9 technology in combination with a donor DNA template to perform precise gene editing. The Cas9 enzyme creates a double-strand break at a specific genomic location, and the cell's own homologous recombination machinery uses the donor DNA as a template to repair the break, effectively inserting the desired genetic modification.</p>
+            </div>
+            <div class="activities"><h5>Activities</h5><ul><li>Research and present a case study of a disease linked to defects in homologous recombination.</li><li>Design an experiment to demonstrate the role of homologous recombination in gene targeting.</li></ul></div>
+            <div class="resources"><h5>Resources</h5><ul><li>Scientific articles on the role of homologous recombination in DNA repair and meiosis.</li><li>Online databases of genes involved in homologous recombination and their associated diseases.</li></ul></div>
+            <button class="take-quiz-button" onclick="startQuiz(3, 1)">Take Quiz 4.2</button>
+          </div>
+        </div>
+      </div>
+      
+    </div> <div class="tab-content" id="progress-tab">
+      <div class="card progress-card" id="overall-progress-card"> <div class="card-header"><h2>Overall Progress</h2></div>
+        <div class="card-content">
+          <div id="student-name-print" style="display: none;"></div> <div>
+            <div class="flex justify-between"><span>Course Completion</span><span id="overall-progress-percentage">0%</span></div>
+            <div class="progress-bar"><div class="progress-bar-fill" id="overall-progress-bar" style="width: 0%"></div></div>
+          </div>
+          <div style="margin-top: 2rem;">
+            <h3>Completed Lessons</h3>
+            <div style="display: flex; align-items: baseline; margin-top: 0.5rem;">
+              <div style="font-size: 1.5rem; font-weight: bold;" id="completed-lessons-count">0</div>
+              <div style="margin-left: 0.5rem; color: var(--muted-foreground);">/ <span id="total-lessons-count">0</span> lessons</div>
+            </div>
+          </div>
+          <div style="margin-top: 2rem;">
+            <h3>Average Quiz Score</h3>
+            <div style="display: flex; align-items: baseline; margin-top: 0.5rem;">
+              <div style="font-size: 1.5rem; font-weight: bold;" id="average-quiz-score">0%</div>
+              <div style="margin-left: 0.5rem; color: var(--muted-foreground);">across <span id="completed-quizzes-count">0</span> quizzes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="module-progress-card"> <div class="card-header"><h2>Module Progress</h2></div>
+        <div class="card-content"><div id="module-progress-container"></div></div>
+        <div class="card-footer">
+             <input type="text" id="student-name" placeholder="Enter Student Name">
+             <button onclick="printProgressReport()">Print Progress Report</button>
+             <button onclick="exportProgressReport()">Export Progress Report</button>
+        </div>
+      </div>
+    </div> </div> <div class="quiz-modal" id="quiz-modal">
+    <div class="quiz-modal-content">
+        <div class="quiz-modal-header">
+            <h3 class="quiz-modal-title" id="quiz-modal-title">Quiz</h3>
+            <button class="quiz-modal-close-button" onclick="closeQuiz()" title="Close Quiz">&times;</button>
+        </div>
+        <div class="quiz-modal-body" id="quiz-modal-body">
+            </div>
+    </div>
+  </div>
+  
+  <script>
+    // --- Course Data (Restored full explanations) ---
+    const courseData = {"title":"Molecular Mechanisms of Genome Replication and Maintenance","description":"This course explores the fundamental processes of DNA replication, cell cycle control, and genome maintenance. Students will investigate the molecular machinery and mechanisms involved in accurate DNA duplication, the regulation of the cell cycle, and the pathways that repair damaged DNA and facilitate genetic recombination.","learningObjectives":["Describe the key characteristics of DNA replication, including its semiconservative nature, bidirectionality, and origin specificity.","Explain the roles of various enzymes and proteins involved in DNA replication, such as DNA polymerases, helicases, and ligases.","Analyze the integration of DNA replication with the cell cycle and the importance of cell cycle checkpoints.","Compare and contrast different DNA repair mechanisms, including mismatch repair, excision repair, and end-joining repair.","Explain the mechanism and function of homologous recombination in DNA repair and genetic diversity."],"modules":[{"title":"DNA Replication: Mechanisms and Characteristics","description":"This module explores the fundamental characteristics of DNA replication and the intricate molecular machinery that ensures accurate genome duplication.","lessons":[{"title":"Characteristics of Chromosome Replication","content":"...","activities":[/*...*/],"resources":[/*...*/],"quiz":{"title":"Characteristics of Chromosome Replication Quiz","questions":[{"question":"What does it mean for DNA replication to be semiconservative?","options":["Each new DNA molecule consists of two newly synthesized strands.","Each new DNA molecule consists of two original (parental) strands.","Each new DNA molecule consists of one original strand and one newly synthesized strand.","The original DNA molecule is completely degraded and rebuilt."],"correctAnswer":2,"explanation":"Semiconservative replication means that each new DNA molecule contains one original (parental) strand and one newly synthesized strand."},{"question":"What is the role of origins of replication?","options":["They are the sites where DNA replication terminates.","They are specific DNA sequences where replication initiates.","They are the locations where telomeres are attached to the chromosome.","They are the sites where DNA polymerase proofreads the newly synthesized strand."],"correctAnswer":1,"explanation":"Origins of replication are specific DNA sequences recognized by initiator proteins, leading to the formation of replication forks where replication begins."},{"question":"Which of the following is NOT a mechanism that ensures the accuracy of DNA replication?","options":["DNA polymerase proofreading activity","Mismatch repair systems","Telomere shortening","Origin Recognition Complex (ORC)"],"correctAnswer":2,"explanation":"Telomere shortening is a consequence of DNA replication, not a mechanism to ensure accuracy. While ORC is involved in the initiation of replication, it does not directly ensure accuracy."},{"question":"What is the 'end-replication problem'?","options":["The inability of DNA polymerase to replicate the very ends of the lagging strand.","The accumulation of errors at the origins of replication.","The degradation of telomeres due to oxidative stress.","The difficulty in replicating highly repetitive DNA sequences."],"correctAnswer":0,"explanation":"The end-replication problem refers to the fact that the lagging strand cannot be fully replicated at the very end of the chromosome by DNA polymerase, leading to telomere shortening."},{"question":"What enzyme helps to overcome the end-replication problem?","options":["DNA ligase","DNA polymerase","Telomerase","Helicase"],"correctAnswer":2,"explanation":"Telomerase is a specialized enzyme that extends telomeres, preventing the loss of genetic information due to the end-replication problem."}]}},{"title":"Replication Machinery and Mechanisms","content":"...","activities":[/*...*/],"resources":[/*...*/],"quiz":{"title":"Replication Machinery and Mechanisms Quiz","questions":[{"question":"Which of the following is the primary function of the Origin Recognition Complex (ORC) in DNA replication?","options":["Unwinding the DNA double helix","Binding to specific DNA sequences at the origins of replication","Synthesizing RNA primers","Joining Okazaki fragments"],"correctAnswer":1,"explanation":"The Origin Recognition Complex (ORC) binds to specific DNA sequences at the origins of replication, initiating the recruitment of other proteins involved in DNA replication."},{"question":"What is the role of single-stranded DNA binding proteins (SSBPs) during DNA replication?","options":["Unwinding the DNA double helix","Preventing re-annealing of separated DNA strands","Synthesizing DNA from RNA primers","Relieving torsional stress"],"correctAnswer":1,"explanation":"Single-stranded DNA binding proteins (SSBPs) bind to the separated DNA strands to prevent them from re-annealing and forming secondary structures that could impede replication."},{"question":"Which enzyme is responsible for joining Okazaki fragments on the lagging strand?","options":["Helicase","Primase","DNA polymerase","DNA ligase"],"correctAnswer":3,"explanation":"DNA ligase joins the Okazaki fragments on the lagging strand, creating a continuous DNA strand."},{"question":"What is the function of topoisomerases during DNA replication?","options":["Synthesizing RNA primers","Unwinding the DNA double helix","Relieving torsional stress caused by DNA unwinding","Adding nucleotides to the growing DNA strand"],"correctAnswer":2,"explanation":"Topoisomerases relieve the torsional stress generated by the unwinding of DNA by helicase, preventing DNA supercoiling and tangling."},{"question":"Mutations in the proofreading domain of DNA polymerase can lead to which of the following?","options":["Decreased mutation rate","Increased mutation rate and genomic instability","Faster DNA replication","Reduced DNA replication"],"correctAnswer":1,"explanation":"Mutations affecting the proofreading domain of DNA polymerase can lead to a significant increase in the mutation rate, resulting in genomic instability."}]}}]},{"title":"Replication, the Cell Cycle, and DNA Integrity","description":"This module examines the integration of DNA replication with the cell cycle and the critical role of checkpoints in maintaining genomic integrity.","lessons":[{"title":"Replication and the Cell Cycle","content":"...","activities":[/*...*/],"resources":[/*...*/],"quiz":{"title":"Replication and the Cell Cycle Quiz","questions":[{"question":"During which phase of the cell cycle does DNA replication primarily occur?","options":["G1 phase","S phase","G2 phase","M phase"],"correctAnswer":1,"explanation":"The S phase of the cell cycle is specifically dedicated to DNA replication."},{"question":"What is the role of cyclins in regulating the cell cycle?","options":["They directly phosphorylate target proteins.","They degrade DNA during replication.","They bind to and activate cyclin-dependent kinases (CDKs).","They inhibit the origin recognition complex (ORC)."],"correctAnswer":2,"explanation":"Cyclins bind to and activate CDKs, which then phosphorylate target proteins to drive the cell cycle forward."},{"question":"What is the function of the S-phase checkpoint?","options":["To initiate DNA replication.","To ensure DNA replication is complete before mitosis.","To promote cell growth.","To degrade cyclin-CDK complexes."],"correctAnswer":1,"explanation":"The S-phase checkpoint monitors the completion and accuracy of DNA replication, preventing entry into mitosis if replication is incomplete or errors are detected."},{"question":"What is the origin recognition complex (ORC) responsible for?","options":["Degrading cyclins.","Initiating DNA replication.","Activating the S-phase checkpoint.","Promoting cell division."],"correctAnswer":1,"explanation":"S-phase cyclin-CDK complexes activate the ORC and recruit other replication factors to the origins of replication, initiating DNA replication."},{"question":"What happens if DNA replication is stalled or incomplete?","options":["The cell immediately enters mitosis.","The S-phase checkpoint is activated, inhibiting cyclin-CDK complexes that promote entry into mitosis.","DNA repair is impossible.","The cell skips the G2 phase."],"correctAnswer":1,"explanation":"If DNA replication is stalled or incomplete, the S-phase checkpoint is activated, inhibiting the activity of cyclin-CDK complexes that promote entry into mitosis, allowing time for repair or completion."}]}},{"title":"Replication Errors and DNA Damage","content":"...","activities":[/*...*/],"resources":[/*...*/],"quiz":{"title":"Replication Errors and DNA Damage Quiz","questions":[{"question":"Which of the following is NOT a source of DNA damage?","options":["Ultraviolet (UV) radiation","DNA polymerase proofreading","Spontaneous chemical changes","Exposure to certain chemicals"],"correctAnswer":1,"explanation":"DNA polymerase proofreading actually corrects errors, whereas UV radiation, spontaneous chemical changes, and exposure to certain chemicals can all cause DNA damage."},{"question":"What type of DNA damage is commonly caused by ultraviolet (UV) radiation?","options":["Base deamination","Pyrimidine dimers","DNA strand breaks","Base alkylation"],"correctAnswer":1,"explanation":"UV radiation is known to induce the formation of pyrimidine dimers, which are covalent linkages between adjacent pyrimidine bases in the DNA strand."},{"question":"Which DNA repair pathway is most likely to be used to correct errors that escape proofreading during replication?","options":["Base excision repair","Nucleotide excision repair","Mismatch repair","Non-homologous end joining"],"correctAnswer":2,"explanation":"Mismatch repair is specifically designed to correct errors that were missed by the DNA polymerase's proofreading activity during replication."},{"question":"Which DNA repair pathway is considered error-prone and can lead to insertions or deletions?","options":["Base excision repair","Nucleotide excision repair","Mismatch repair","Non-homologous end joining"],"correctAnswer":3,"explanation":"Non-homologous end joining is a quick but error-prone repair mechanism for double-strand breaks, often resulting in small insertions or deletions at the repair site."},{"question":"What is a potential consequence of failure to repair DNA damage?","options":["Increased DNA replication fidelity","Decreased mutation rate","Cancer development","Enhanced cell survival"],"correctAnswer":2,"explanation":"Failure to repair DNA damage can lead to mutations, which can accumulate and contribute to the development of cancer and other diseases. The other options are the opposite of the truth."}]}}]},{"title":"DNA Repair Mechanisms","description":"This module explores the various DNA repair mechanisms that cells utilize to correct replication errors and repair DNA damage.","lessons":[{"title":"DNA Repair Systems","content":"...","activities":[/*...*/],"resources":[/*...*/],"quiz":{"title":"DNA Repair Systems Quiz","questions":[{"question":"Which DNA repair mechanism directly reverses certain types of DNA damage, such as removing methyl groups from guanine?","options":["Mismatch Repair (MMR)","Base Excision Repair (BER)","Direct Reversal","Nucleotide Excision Repair (NER)"],"correctAnswer":2,"explanation":"Direct reversal mechanisms, like MGMT removing methyl groups from guanine, directly correct the damage without requiring nucleotide excision or replacement."},{"question":"Which repair pathway is primarily responsible for correcting bulky, helix-distorting lesions like pyrimidine dimers caused by UV radiation?","options":["Base Excision Repair (BER)","Mismatch Repair (MMR)","Homologous Recombination (HR)","Nucleotide Excision Repair (NER)"],"correctAnswer":3,"explanation":"Nucleotide Excision Repair (NER) is specifically designed to handle bulky lesions that distort the DNA helix, such as pyrimidine dimers."},{"question":"In E. coli, which protein complex is crucial for mismatch repair (MMR) by cleaving the newly synthesized strand?","options":["MutS, MutL, MutH","DNA Polymerase, Ligase","DNA Glycosylase, AP Endonuclease","Ku70/Ku80, DNA-PKcs"],"correctAnswer":0,"explanation":"The MutS, MutL, and MutH protein complex is responsible for mismatch repair in E. coli, with MutH specifically cleaving the newly synthesized strand at a GATC site."},{"question":"Which double-strand break repair (DSBR) pathway is more error-prone and directly ligates broken ends, often introducing small insertions or deletions?","options":["Homologous Recombination (HR)","Non-Homologous End Joining (NHEJ)","Base Excision Repair (BER)","Mismatch Repair (MMR)"],"correctAnswer":1,"explanation":"Non-Homologous End Joining (NHEJ) is an error-prone DSBR pathway that directly ligates broken ends without using a homologous template, often resulting in insertions or deletions."},{"question":"Which tumor suppressor protein plays a central role in the interplay between DNA repair and cell cycle control, inducing cell cycle arrest, DNA repair, or apoptosis depending on the severity of the damage?","options":["ATM","ATR","p53","MGMT"],"correctAnswer":2,"explanation":"The p53 tumor suppressor protein is a key regulator in response to DNA damage, determining whether the cell undergoes cell cycle arrest, DNA repair, or apoptosis based on the extent of the damage."}]}},{"title":"Consequences of Replication Errors and DNA Damage","content":"...","activities":[/*...*/],"resources":[/*...*/],"quiz":{"title":"Consequences of Replication Errors and DNA Damage Quiz","questions":[{"question":"An elevated mutation rate, driven by unrepaired DNA damage, can have detrimental effects. Which of the following is NOT mentioned as a potential consequence?","options":["Subtle phenotypic changes","Increased adaptation speed","Cellular dysfunction","Increased susceptibility to age-related disorders"],"correctAnswer":1,"explanation":"The passage states that an elevated mutation rate can lead to detrimental effects, including phenotypic changes, cellular dysfunction, and increased susceptibility to age-related disorders. It does not suggest that it increases adaptation speed; instead, it links it to detrimental outcomes."},{"question":"Mutations in tumor suppressor genes like p53 or BRCA1/2 can lead to which of the following?","options":["Increased DNA repair efficiency","Controlled cell growth","Uncontrolled cell growth and tumor formation","Decreased apoptosis"],"correctAnswer":2,"explanation":"The lesson explains that tumor suppressor genes like p53 and BRCA1/2 normally have protective functions. When mutated, these functions are disabled, leading to uncontrolled cell growth and tumor formation."},{"question":"What is the role of apoptosis in the context of DNA damage?","options":["To repair damaged DNA","To promote cell proliferation","To eliminate cells with irreparable DNA damage","To increase mutation rate"],"correctAnswer":2,"explanation":"Apoptosis, or programmed cell death, is a mechanism for eliminating cells with irreparable DNA damage, preventing the propagation of potentially harmful mutations."},{"question":"Xeroderma Pigmentosum (XP) is characterized by extreme sensitivity to UV radiation due to mutations in genes involved in what process?","options":["Mismatch repair","Base excision repair","Nucleotide excision repair (NER)","Homologous recombination"],"correctAnswer":2,"explanation":"Individuals with XP have mutations in genes involved in Nucleotide Excision Repair (NER), rendering them unable to effectively repair UV-induced DNA damage."},{"question":"Lynch syndrome (HNPCC) is associated with mutations in which type of genes?","options":["Tumor suppressor genes","Mismatch repair genes","DNA polymerase genes","Telomerase genes"],"correctAnswer":1,"explanation":"Lynch syndrome (Hereditary Non-Polyposis Colorectal Cancer, HNPCC) is caused by mutations in mismatch repair genes, leading to the accumulation of replication errors and a higher risk of certain cancers."}]}}]},{"title":"Homologous Recombination","description":"This module examines the process of homologous recombination, its mechanisms, and its role in DNA repair and genetic diversity.","lessons":[{"title":"Homologous Recombination: Definition and Mechanism","content":"...","activities":[/*...*/],"resources":[/*...*/],"quiz":{"title":"Homologous Recombination: Definition and Mechanism Quiz","questions":[{"question":"What is the primary function of homologous recombination (HR)?","options":["To prevent DNA replication.","To exchange genetic material between similar DNA sequences.","To degrade damaged DNA.","To inhibit protein synthesis."],"correctAnswer":1,"explanation":"Homologous recombination involves the exchange of genetic material between two DNA molecules that share similar or identical sequences. This is crucial for DNA repair and genetic diversity."},{"question":"In the Holliday model, what initiates the process of homologous recombination?","options":["A double-strand break.","A single-strand break (nick).","DNA methylation.","Histone modification."],"correctAnswer":1,"explanation":"The Holliday model begins with a single-strand break, or nick, in one of the homologous DNA molecules, which serves as the entry point for strand invasion."},{"question":"What is a Holliday junction?","options":["The point where two DNA molecules are connected during homologous recombination.","A protein complex that degrades damaged DNA.","A region of DNA with highly repetitive sequences.","The site where DNA replication begins."],"correctAnswer":0,"explanation":"The Holliday junction is the point where the two DNA molecules are connected during homologous recombination, formed after strand invasion."},{"question":"Which of the following is a key feature of the Double-Strand Break Repair (DSBR) pathway?","options":["It only occurs in prokaryotic cells.","It begins with a single-strand break.","It involves the formation of a displacement loop (D-loop).","It always results in crossover products."],"correctAnswer":2,"explanation":"The DSBR pathway involves the formation of a displacement loop (D-loop) during the strand invasion process, which is a key characteristic of this pathway."},{"question":"What is the potential outcome of resolving Holliday junctions in the DSBR pathway?","options":["Only crossover products.","Only non-crossover products.","Either crossover or non-crossover products.","Complete degradation of the DNA molecules."],"correctAnswer":2,"explanation":"Resolution of both Holliday junctions in the DSBR pathway can lead to either crossover or non-crossover products, depending on how the junctions are resolved."}]}},{"title":"Functions of Homologous Recombination","content":"...","activities":[/*...*/],"resources":[/*...*/],"quiz":{"title":"Functions of Homologous Recombination Quiz","questions":[{"question":"What is the primary function of homologous recombination in DNA repair?","options":["Introducing mutations to increase genetic diversity.","Repairing single-strand breaks using non-homologous end joining.","Repairing double-strand breaks with high fidelity using a homologous template.","Preventing DNA replication."],"correctAnswer":2,"explanation":"Homologous recombination uses a homologous chromosome as a template to accurately repair double-strand breaks, ensuring high fidelity."},{"question":"During meiosis, homologous recombination contributes to genetic diversity through which process?","options":["DNA replication.","Crossing over.","Non-homologous end joining.","Telomere shortening."],"correctAnswer":1,"explanation":"Crossing over, facilitated by homologous recombination, involves the exchange of genetic material between homologous chromosomes, leading to new allele combinations."},{"question":"How is homologous recombination used in gene targeting techniques?","options":["To randomly insert DNA sequences into the genome.","To degrade unwanted DNA sequences.","To integrate modified DNA sequences into specific locations in the genome.","To prevent gene expression."],"correctAnswer":2,"explanation":"Homologous recombination allows scientists to precisely insert modified DNA sequences into specific locations in the genome, enabling gene editing and functional studies."},{"question":"Mutations in BRCA1 and BRCA2 genes, which are involved in homologous recombination, increase the risk of which type of cancer?","options":["Lung cancer","Breast and ovarian cancer","Skin cancer","Prostate cancer"],"correctAnswer":1,"explanation":"BRCA1 and BRCA2 are crucial for homologous recombination-mediated repair of double-strand breaks. Mutations lead to DNA damage accumulation and genomic instability, increasing the risk of breast and ovarian cancer."},{"question":"In CRISPR-Cas9 gene editing, what role does homologous recombination play after Cas9 creates a double-strand break?","options":["It degrades the broken DNA ends.","It uses a donor DNA template to repair the break, inserting the desired genetic modification.","It prevents the cell from dividing.","It randomly inserts DNA sequences into the break."],"correctAnswer":1,"explanation":"After Cas9 creates a double-strand break, the cell's homologous recombination machinery uses a provided donor DNA template to repair the break, effectively inserting the desired genetic modification."}]}}]}]};
+    // Note: Content/Activities/Resources still omitted for brevity, but quizzes are complete.
+
+    // --- State Management ---
+    const defaultProgress = {
+      completedModules: [],
+      completedLessons: {}, // { "module-0": ["lesson-0", "lesson-1"], "module-1": ["lesson-0"] }
+      quizScores: {},       // { "module-0-lesson-0": 80, "module-0-lesson-1": 100 }
+      quizAnswers: {},      // { "module-0-lesson-0": [2, 1, 2, 0, 2], "module-0-lesson-1": [...] }
+      lastAccessed: null
+    };
+    let courseProgress = {}; // Will be populated by loadProgress
+    let currentQuizInfo = { moduleIndex: null, lessonIndex: null }; // Keep track of the active quiz
+
+    // --- DOM Element References ---
+    let quizModalElement;
+    let quizModalTitleElement;
+    let quizModalBodyElement;
+    let studentNameInputElement; // Added reference for name input
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM fully loaded and parsed");
+      // Get references to key elements
+      quizModalElement = document.getElementById('quiz-modal');
+      quizModalTitleElement = document.getElementById('quiz-modal-title');
+      quizModalBodyElement = document.getElementById('quiz-modal-body');
+      studentNameInputElement = document.getElementById('student-name'); // Get name input element
+
+      loadProgress(); // Load saved progress first
+      initializeUI();   // Then setup UI elements based on loaded progress
+      saveProgress(); // Save initial state (or loaded state) with timestamp
+    });
+
+    function initializeUI() {
+        console.log("Initializing UI...");
+        setupTabs();
+        setupModuleToggles();
+        updateCheckboxesFromProgress();
+        countTotalLessons();
+        updateProgressUI();
+        generateModuleProgressUI();
+        console.log("UI Initialized.");
+    }
+
+
+    // --- Local Storage ---
+    function saveProgress() {
+      try {
+          courseProgress.lastAccessed = new Date().toISOString();
+          localStorage.setItem('courseProgressData', JSON.stringify(courseProgress));
+          // console.log("Progress saved:", courseProgress); // Less verbose
+      } catch (e) {
+          console.error("Error saving progress to localStorage:", e);
+      }
+    }
+
+    function loadProgress() {
+        try {
+            const savedProgress = localStorage.getItem('courseProgressData');
+            if (savedProgress) {
+                courseProgress = JSON.parse(savedProgress);
+                console.log("Progress loaded.");
+                // Basic validation
+                if (typeof courseProgress.completedLessons !== 'object' || courseProgress.completedLessons === null) courseProgress.completedLessons = {};
+                if (typeof courseProgress.quizScores !== 'object' || courseProgress.quizScores === null) courseProgress.quizScores = {};
+                if (typeof courseProgress.quizAnswers !== 'object' || courseProgress.quizAnswers === null) courseProgress.quizAnswers = {};
+                if (!Array.isArray(courseProgress.completedModules)) courseProgress.completedModules = [];
+            } else {
+                console.log("No saved progress found, initializing default.");
+                courseProgress = JSON.parse(JSON.stringify(defaultProgress));
+            }
+        } catch (e) {
+            console.error('Error parsing saved progress, resetting to default:', e);
+            courseProgress = JSON.parse(JSON.stringify(defaultProgress));
+        }
+    }
+
+    // --- UI Interaction Functions ---
+
+    function setupTabs() {
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.getAttribute('data-tab');
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          tabContents.forEach(content => {
+            content.classList.toggle('active', content.id === tabId + '-tab');
+          });
+        });
+      });
+    }
+
+    function setupModuleToggles() {
+        console.log("Setting up module toggles (event listeners attached in HTML)");
+    }
+
+    function toggleModule(moduleIndex) {
+      const moduleContent = document.getElementById(`module-${moduleIndex}`);
+      const moduleToggle = document.querySelector(`.module[data-module-id="${moduleIndex}"] .module-toggle`);
+      if (moduleContent && moduleToggle) {
+        const isVisible = moduleContent.classList.toggle('visible');
+        moduleToggle.style.transform = isVisible ? 'rotate(180deg)' : 'rotate(0deg)';
+      } else {
+          console.error(`Could not find module content or toggle for index ${moduleIndex}`);
+      }
+    }
+
+    function toggleLessonCompletion(moduleIndex, lessonIndex, completed) {
+      const moduleId = `module-${moduleIndex}`;
+      const lessonId = `lesson-${lessonIndex}`;
+      if (!courseProgress.completedLessons[moduleId]) {
+        courseProgress.completedLessons[moduleId] = [];
+      }
+      const lessonSet = new Set(courseProgress.completedLessons[moduleId]);
+      if (completed) lessonSet.add(lessonId); else lessonSet.delete(lessonId);
+      courseProgress.completedLessons[moduleId] = Array.from(lessonSet);
+      checkModuleCompletion(moduleIndex);
+      updateProgressUI();
+      saveProgress();
+    }
+
+    function checkModuleCompletion(moduleIndex) {
+        const moduleId = `module-${moduleIndex}`;
+        const moduleData = courseData.modules[moduleIndex];
+        if (!moduleData) return;
+        const totalLessonsInModule = moduleData.lessons.length;
+        const completedLessonsInModule = courseProgress.completedLessons[moduleId]?.length || 0;
+        const allLessonsCompleted = totalLessonsInModule > 0 && completedLessonsInModule === totalLessonsInModule;
+        const moduleSet = new Set(courseProgress.completedModules);
+        if (allLessonsCompleted) moduleSet.add(moduleId); else moduleSet.delete(moduleId);
+        courseProgress.completedModules = Array.from(moduleSet);
+    }
+
+    function updateCheckboxesFromProgress() {
+        document.querySelectorAll('.lesson-checkbox').forEach(checkbox => {
+            const modId = `module-${checkbox.dataset.moduleId}`;
+            const lessId = `lesson-${checkbox.dataset.lessonId}`;
+            checkbox.checked = courseProgress.completedLessons[modId]?.includes(lessId) || false;
+        });
+    }
+
+    // --- Quiz Modal Functions ---
+
+    function startQuiz(moduleIndex, lessonIndex) {
+        console.log(`Starting quiz for M${moduleIndex} L${lessonIndex}`);
+        currentQuizInfo = { moduleIndex, lessonIndex }; // Store current quiz context
+
+        const quizData = courseData.modules[moduleIndex]?.lessons[lessonIndex]?.quiz;
+        if (!quizData || !quizModalElement || !quizModalTitleElement || !quizModalBodyElement) {
+            console.error("Quiz data or modal elements not found.");
+            alert("Could not load the quiz. Please try again.");
+            return;
+        }
+
+        // Set modal title
+        quizModalTitleElement.textContent = escapeHtml(quizData.title || `Quiz ${moduleIndex + 1}.${lessonIndex + 1}`);
+
+        // Clear previous modal content
+        quizModalBodyElement.innerHTML = '';
+
+        // Build quiz HTML
+        let quizHTML = `
+            <div class="quiz-container">
+                <div class="quiz-progress"><div class="quiz-progress-bar" style="width: 0%"></div></div>
+                <div class="quiz-questions">
+        `;
+
+        quizData.questions.forEach((q, questionIndex) => {
+            quizHTML += `
+                <div class="quiz-question" data-question-index="${questionIndex}" style="${questionIndex === 0 ? '' : 'display: none;'}">
+                    <p><strong>Question ${questionIndex + 1} of ${quizData.questions.length}:</strong> ${escapeHtml(q.question)}</p>
+                    <ul class="quiz-options">
+            `;
+            q.options.forEach((option, optionIndex) => {
+                // IMPORTANT: Pass currentQuizInfo indices to the onclick handlers
+                quizHTML += `
+                    <li class="quiz-option" data-option-index="${optionIndex}" 
+                        onclick="selectQuizOptionInModal(${optionIndex})">
+                        ${String.fromCharCode(65 + optionIndex)}. ${escapeHtml(option)}
+                    </li>
+                `;
+            });
+            quizHTML += `
+                    </ul>
+                    <div class="quiz-explanation" style="display: none;"> 
+                        <p><strong>Explanation:</strong> ${escapeHtml(q.explanation)}</p>
+                    </div>
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button class="submit-answer" onclick="submitQuizAnswerInModal(${questionIndex})">Submit Answer</button>
+                        <button class="next-question" style="display: none;" 
+                                onclick="nextQuizQuestionInModal(${questionIndex})">
+                            ${questionIndex === quizData.questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        quizHTML += `
+                </div> <div class="quiz-result" style="display: none;">
+                    <h5>Quiz Completed!</h5>
+                    <div class="quiz-score">0%</div>
+                    <p class="quiz-feedback"></p>
+                    <button onclick="retakeQuizInModal()">Retake Quiz</button>
+                    <button onclick="closeQuiz()">Close</button>
+                </div>
+            </div> `;
+
+        quizModalBodyElement.innerHTML = quizHTML;
+
+        // Show modal and hide background content
+        document.body.classList.add('modal-open');
+        quizModalElement.classList.add('visible');
+    }
+
+    function closeQuiz() {
+        if (quizModalElement) {
+            quizModalElement.classList.remove('visible');
+            document.body.classList.remove('modal-open');
+            // Optional: Clear modal body after fade out for cleanliness
+            setTimeout(() => {
+                if (quizModalBodyElement) quizModalBodyElement.innerHTML = '';
+                currentQuizInfo = { moduleIndex: null, lessonIndex: null }; // Reset current quiz context
+            }, 300); // Match CSS transition duration
+            console.log("Quiz modal closed.");
+        }
+    }
+
+    // --- Quiz Functions (Adapted for Modal Context) ---
+
+    function selectQuizOptionInModal(optionIndex) {
+        const { moduleIndex, lessonIndex } = currentQuizInfo;
+        if (moduleIndex === null || lessonIndex === null) return; // No active quiz
+
+        const questionIndex = getCurrentVisibleQuestionIndex();
+        if (questionIndex === null) return;
+
+        const quizQuestionElement = quizModalBodyElement.querySelector(`.quiz-question[data-question-index="${questionIndex}"]`);
+        if (!quizQuestionElement) return;
+
+        quizQuestionElement.querySelectorAll('.quiz-option').forEach(option => option.classList.remove('selected'));
+        const selectedOptionElement = quizQuestionElement.querySelector(`.quiz-option[data-option-index="${optionIndex}"]`);
+        if (selectedOptionElement) selectedOptionElement.classList.add('selected');
+
+        // console.log(`Modal Q${questionIndex}: Selected option ${optionIndex}`); // Less verbose
+    }
+
+    function submitQuizAnswerInModal(questionIndex) {
+        const { moduleIndex, lessonIndex } = currentQuizInfo;
+        if (moduleIndex === null || lessonIndex === null) return;
+
+        const quizQuestionElement = quizModalBodyElement.querySelector(`.quiz-question[data-question-index="${questionIndex}"]`);
+        if (!quizQuestionElement) return;
+
+        const selectedOption = quizQuestionElement.querySelector('.quiz-option.selected');
+        if (!selectedOption) {
+            alert('Please select an answer before submitting.');
+            return;
+        }
+
+        const selectedIndex = parseInt(selectedOption.getAttribute('data-option-index'));
+        const correctIndex = courseData.modules[moduleIndex]?.lessons[lessonIndex]?.quiz?.questions[questionIndex]?.correctAnswer;
+        const explanationElement = quizQuestionElement.querySelector('.quiz-explanation');
+
+        if (explanationElement === null || typeof correctIndex !== 'number') {
+            console.error("Could not find explanation or correct answer index in courseData for modal quiz.");
+            alert("Error processing answer.");
+            return;
+        }
+
+        // console.log(`Modal Q${questionIndex}: Submitting answer. Selected ${selectedIndex}, Correct ${correctIndex}`); // Less verbose
+
+        // Store answer
+        const quizKey = `module-${moduleIndex}-lesson-${lessonIndex}`;
+        if (!courseProgress.quizAnswers[quizKey]) courseProgress.quizAnswers[quizKey] = [];
+        while (courseProgress.quizAnswers[quizKey].length <= questionIndex) courseProgress.quizAnswers[quizKey].push(null);
+        courseProgress.quizAnswers[quizKey][questionIndex] = selectedIndex;
+
+        // Mark options and disable
+        quizQuestionElement.querySelectorAll('.quiz-option').forEach(option => {
+            option.style.pointerEvents = 'none';
+            const optionIdx = parseInt(option.getAttribute('data-option-index'));
+            if (optionIdx === correctIndex) option.classList.add('correct');
+            else if (option.classList.contains('selected')) option.classList.add('incorrect');
+            option.classList.remove('selected');
+        });
+
+        // Show explanation
+        explanationElement.classList.add('visible'); // Use class to show
+        // Ensure the explanation content is set (it should be from startQuiz)
+        const explanationTextElement = explanationElement.querySelector('p');
+        if (explanationTextElement) {
+             const explanationText = courseData.modules[moduleIndex]?.lessons[lessonIndex]?.quiz?.questions[questionIndex]?.explanation;
+             explanationTextElement.innerHTML = `<strong>Explanation:</strong> ${escapeHtml(explanationText)}`;
+        }
+
+
+        // Toggle buttons
+        const submitButton = quizQuestionElement.querySelector('.submit-answer');
+        const nextButton = quizQuestionElement.querySelector('.next-question');
+        if (submitButton) submitButton.style.display = 'none';
+        if (nextButton) nextButton.style.display = 'inline-block';
+
+        // Update progress bar within modal
+        const totalQuestions = courseData.modules[moduleIndex]?.lessons[lessonIndex]?.quiz?.questions?.length;
+        updateQuizProgressBarInModal(questionIndex + 1, totalQuestions);
+
+        saveProgress();
+    }
+
+    function nextQuizQuestionInModal(currentQuestionIndex) {
+        const { moduleIndex, lessonIndex } = currentQuizInfo;
+        if (moduleIndex === null || lessonIndex === null) return;
+
+        const questions = quizModalBodyElement.querySelectorAll('.quiz-question');
+        const totalQuestions = questions.length;
+
+        // console.log(`Modal: Moving from Q${currentQuestionIndex}`); // Less verbose
+
+        if (questions[currentQuestionIndex]) questions[currentQuestionIndex].style.display = 'none';
+
+        if (currentQuestionIndex >= totalQuestions - 1) {
+            finishQuiz(); // Call finishQuiz when the last question is done
+        } else {
+            const nextQuestionIndex = currentQuestionIndex + 1;
+            if (questions[nextQuestionIndex]) questions[nextQuestionIndex].style.display = 'block';
+        }
+    }
+
+    function finishQuiz() {
+        const { moduleIndex, lessonIndex } = currentQuizInfo;
+        if (moduleIndex === null || lessonIndex === null) return;
+
+        console.log(`Finishing quiz M${moduleIndex} L${lessonIndex}`);
+
+        const resultContainer = quizModalBodyElement.querySelector('.quiz-result');
+        const scoreElement = resultContainer?.querySelector('.quiz-score');
+        const feedbackElement = resultContainer?.querySelector('.quiz-feedback');
+
+        if (!resultContainer || !scoreElement || !feedbackElement) {
+            console.error("Missing elements needed to show quiz results in modal.");
+            return;
+        }
+
+        // Calculate score
+        const quizKey = `module-${moduleIndex}-lesson-${lessonIndex}`;
+        const userAnswers = courseProgress.quizAnswers[quizKey] || [];
+        const questionsData = courseData.modules[moduleIndex]?.lessons[lessonIndex]?.quiz?.questions;
+
+        if (!questionsData || !Array.isArray(questionsData)) {
+            console.error("Could not find valid quiz questions data for scoring.");
+            scoreElement.textContent = `Error!`;
+            feedbackElement.textContent = 'Could not calculate score.';
+            resultContainer.style.display = 'block';
+            return;
+        }
+
+        let correctCount = 0;
+        const totalQuestions = questionsData.length;
+        questionsData.forEach((question, index) => {
+            const correctAnswerIndex = question.correctAnswer;
+            const userAnswerIndex = userAnswers[index];
+            if (typeof userAnswerIndex === 'number' && typeof correctAnswerIndex === 'number' && userAnswerIndex === correctAnswerIndex) {
+                correctCount++;
+            }
+        });
+        const score = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+        // Store score
+        courseProgress.quizScores[quizKey] = score;
+        console.log(`Quiz ${quizKey} finished. Score: ${score}%`);
+
+        // Update result UI within modal
+        scoreElement.textContent = `${score}%`;
+        if (score >= 80) feedbackElement.textContent = 'Excellent work!';
+        else if (score >= 60) feedbackElement.textContent = 'Good job! Room for improvement.';
+        else feedbackElement.textContent = 'Review this material again.';
+
+        // Show results container within modal
+        resultContainer.style.display = 'block';
+
+        // Mark lesson as completed
+        const checkbox = document.querySelector(`.lesson-checkbox[data-module-id="${moduleIndex}"][data-lesson-id="${lessonIndex}"]`);
+        if (checkbox && !checkbox.checked) {
+            checkbox.checked = true;
+            toggleLessonCompletion(moduleIndex, lessonIndex, true); // This saves progress and updates main UI
+        } else {
+            // If already complete, still save the score and update main UI
+            updateProgressUI();
+            saveProgress();
+        }
+        // Note: We don't close the modal automatically here. User clicks Close or Retake.
+    }
+
+
+    function retakeQuizInModal() {
+        const { moduleIndex, lessonIndex } = currentQuizInfo;
+        if (moduleIndex === null || lessonIndex === null) return;
+
+        console.log(`Retaking quiz M${moduleIndex} L${lessonIndex} in modal`);
+
+        // Clear stored answers and score for this specific quiz
+        const quizKey = `module-${moduleIndex}-lesson-${lessonIndex}`;
+        delete courseProgress.quizAnswers[quizKey];
+        delete courseProgress.quizScores[quizKey];
+
+        updateProgressUI(); // Update average score etc. on main page
+        saveProgress(); // Save the reset state
+
+        // Restart the quiz by regenerating its content in the modal
+        startQuiz(moduleIndex, lessonIndex);
+    }
+
+    function updateQuizProgressBarInModal(questionsAnswered, totalQuestions) {
+        const progressBar = quizModalBodyElement?.querySelector('.quiz-progress-bar');
+        if (progressBar && totalQuestions > 0) {
+            const percentage = Math.round((questionsAnswered / totalQuestions) * 100);
+            progressBar.style.width = `${percentage}%`;
+        } else if (progressBar) {
+             progressBar.style.width = '0%';
+        }
+    }
+
+    function getCurrentVisibleQuestionIndex() {
+        if (!quizModalBodyElement) return null;
+        const visibleQuestion = quizModalBodyElement.querySelector('.quiz-question:not([style*="display: none"])');
+        return visibleQuestion ? parseInt(visibleQuestion.getAttribute('data-question-index')) : null;
+    }
+
+
+    // --- Progress Calculation and Display (Main Page) ---
+
+    let _totalLessonsCache = -1;
+    function countTotalLessons() {
+        if (_totalLessonsCache === -1) {
+            _totalLessonsCache = 0;
+            courseData.modules.forEach(module => {
+                _totalLessonsCache += module.lessons?.length || 0;
+            });
+             const totalLessonsElement = document.getElementById('total-lessons-count');
+             if (totalLessonsElement) totalLessonsElement.textContent = _totalLessonsCache;
+        }
+        return _totalLessonsCache;
+    }
+
+    function updateProgressUI() {
+      const totalLessons = countTotalLessons();
+      if (totalLessons <= 0) return;
+
+      let completedCount = 0;
+      Object.values(courseProgress.completedLessons || {}).forEach(lessons => {
+        completedCount += lessons?.length || 0;
+      });
+      
+      const completedCountElement = document.getElementById('completed-lessons-count');
+      if (completedCountElement) completedCountElement.textContent = completedCount;
+      
+      const progressPercentage = Math.round((completedCount / totalLessons) * 100);
+      const overallPercentElement = document.getElementById('overall-progress-percentage');
+      const overallBarElement = document.getElementById('overall-progress-bar');
+      if (overallPercentElement) overallPercentElement.textContent = `${progressPercentage}%`;
+      if (overallBarElement) overallBarElement.style.width = `${progressPercentage}%`;
+      
+      const quizScores = Object.values(courseProgress.quizScores || {});
+      const averageScore = quizScores.length > 0
+        ? Math.round(quizScores.reduce((sum, score) => sum + (score || 0), 0) / quizScores.length)
+        : 0;
+      const avgScoreElement = document.getElementById('average-quiz-score');
+      const completedQuizzesElement = document.getElementById('completed-quizzes-count');
+      if (avgScoreElement) avgScoreElement.textContent = `${averageScore}%`;
+      if (completedQuizzesElement) completedQuizzesElement.textContent = quizScores.length;
+      
+      updateModuleProgressUI();
+    }
+
+    function generateModuleProgressUI() {
+      const container = document.getElementById('module-progress-container');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      courseData.modules.forEach((module, moduleIndex) => {
+        const moduleId = `module-${moduleIndex}`;
+        const moduleElement = document.createElement('div');
+        moduleElement.className = 'module-progress';
+        
+        const totalLessonsInModule = module.lessons?.length || 0;
+        const completedLessonsInModule = courseProgress.completedLessons[moduleId]?.length || 0;
+        const progressPercentage = totalLessonsInModule > 0 ? Math.round((completedLessonsInModule / totalLessonsInModule) * 100) : 0;
+        
+        moduleElement.innerHTML = `
+          <div class="flex justify-between items-center mb-2">
+            <h4>${moduleIndex + 1}. ${escapeHtml(module.title)}</h4>
+            <span>${progressPercentage}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: ${progressPercentage}%"></div>
+          </div>
+          <div class="mt-2 text-sm text-[color:var(--muted-foreground)]">
+            ${completedLessonsInModule} of ${totalLessonsInModule} lessons completed
+          </div>
+        `;
+        container.appendChild(moduleElement);
+      });
+    }
+
+    function updateModuleProgressUI() {
+      generateModuleProgressUI();
+    }
+    
+    // --- Report Generation ---
+
+    // Function to generate the report content string
+    function generateReportContent() {
+        const studentName = studentNameInputElement?.value.trim() || "N/A"; // Get student name
+        const now = new Date();
+        const timestamp = now.toLocaleString();
+
+        // Format validation code parts
+        const day = String(now.getDate()).padStart(2, '0'); // DD
+        const year = now.getFullYear(); // YYYY
+        const hour = now.getHours(); // HH (as number)
+        
+        // Calculate numeric validation code: DDYYYY * HH
+        const ddyyyyNum = parseInt(`${day}${year}`, 10); // Convert DDYYYY string to number
+        // Ensure hour is treated as a number; handle potential NaN if parseInt fails
+        const validationCode = !isNaN(ddyyyyNum) ? ddyyyyNum * hour : "Error"; 
+
+        const totalLessons = countTotalLessons();
+        let completedCount = 0;
+        Object.values(courseProgress.completedLessons || {}).forEach(lessons => completedCount += lessons?.length || 0);
+        const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+        const quizScores = Object.values(courseProgress.quizScores || {});
+        const averageScore = quizScores.length > 0 ? Math.round(quizScores.reduce((sum, score) => sum + (score || 0), 0) / quizScores.length) : 0;
+
+        let report = `
+Course Progress Report
+=====================
+Student Name: ${escapeHtml(studentName)}
+Course: ${escapeHtml(courseData.title)}
+Report Generated: ${timestamp}
+Validation Code: ${validationCode} 
+
+Overall Progress: ${progressPercentage}%
+Completed Lessons: ${completedCount} of ${totalLessons}
+Average Quiz Score: ${averageScore}% across ${quizScores.length} quizzes
+
+Module Progress:
+--------------
+`;
+
+        courseData.modules.forEach((module, moduleIndex) => {
+            const moduleId = `module-${moduleIndex}`;
+            const totalLessonsInModule = module.lessons?.length || 0;
+            const completedLessonsInModule = courseProgress.completedLessons[moduleId]?.length || 0;
+            const moduleProgressPercentage = totalLessonsInModule > 0 ? Math.round((completedLessonsInModule / totalLessonsInModule) * 100) : 0;
+            report += `\n${moduleIndex + 1}. ${escapeHtml(module.title)}: ${moduleProgressPercentage}% (${completedLessonsInModule} of ${totalLessonsInModule} lessons)\n`;
+            module.lessons.forEach((lesson, lessonIndex) => {
+                const lessonId = `lesson-${lessonIndex}`;
+                const isCompleted = courseProgress.completedLessons[moduleId]?.includes(lessonId) || false;
+                const quizScore = courseProgress.quizScores[`${moduleId}-${lessonId}`];
+                report += `   - ${isCompleted ? '✓' : '○'} ${escapeHtml(lesson.title)}`;
+                if (quizScore !== undefined && quizScore !== null) report += ` (Quiz Score: ${quizScore}%)`;
+                report += `\n`;
+            });
+        });
+        return report;
+    }
+
+    // Function to handle printing the report
+    function printProgressReport() {
+        console.log("Attempting to print progress report...");
+        // Update the hidden div with the student name for printing
+        const studentNamePrintDiv = document.getElementById('student-name-print');
+        const studentName = studentNameInputElement?.value.trim();
+        if (studentNamePrintDiv) {
+            studentNamePrintDiv.textContent = studentName ? `Student Name: ${escapeHtml(studentName)}` : '';
+            studentNamePrintDiv.style.display = studentName ? 'block' : 'none'; // Show only if name exists
+        }
+        
+        // Trigger the browser's print dialog
+        try {
+            window.print();
+        } catch (e) {
+            console.error("Error triggering print dialog:", e);
+            alert("Could not open print dialog. Please check browser settings.");
+        }
+
+        // Hide the name div again after printing attempt (using timeout)
+         if (studentNamePrintDiv) {
+             setTimeout(() => { studentNamePrintDiv.style.display = 'none'; }, 500); // Hide after a short delay
+         }
+    }
+
+    // Function to handle exporting the report
+    function exportProgressReport() {
+      console.log("Exporting progress report...");
+      const reportContent = generateReportContent(); // Generate content including name/codes
+      
+      try {
+          const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          // Sanitize filename
+          const studentNamePart = (studentNameInputElement?.value.trim() || 'student').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+          const courseTitlePart = (courseData.title || 'course').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+          link.download = `${courseTitlePart}-progress-${studentNamePart}.txt`;
+          
+          document.body.appendChild(link); // Required for Firefox
+          link.click();
+          document.body.removeChild(link); // Clean up
+          URL.revokeObjectURL(url); // Free up memory
+          console.log("Progress report download triggered.");
+      } catch (e) {
+          console.error("Error creating or downloading progress report:", e);
+          alert("Could not generate progress report file.");
+      }
+    }
+    
+    // --- Utility Functions ---
+    
+    function escapeHtml(unsafe) {
+      if (typeof unsafe !== 'string') {
+          try { unsafe = String(unsafe); } catch (e) { return ''; }
+      }
+      return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+  </script>
+</body>
+</html>
