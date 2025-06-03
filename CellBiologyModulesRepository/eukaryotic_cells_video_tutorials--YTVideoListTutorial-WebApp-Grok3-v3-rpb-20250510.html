@@ -1,0 +1,621 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eukaryotic Cells Video Tutorials</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .dark .container {
+            background: #2d3748;
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        .dark h1, .dark h2 {
+            color: #63b3ed;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .dark a {
+            color: #63b3ed;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .video-entry {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .dark .video-entry {
+            border-bottom: 1px solid #4a5568;
+        }
+        .video-entry:last-child {
+            border-bottom: none;
+        }
+        #search-bar, #name-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .dark #search-bar, .dark #name-input {
+            background: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 
+
+System: 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .dark .modal-content {
+            background: #2d3748;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        nav a {
+            margin-right: 10px;
+        }
+        #dark-mode-toggle {
+            color: #fff; /* Fixed white text for visibility */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-bold">Eukaryotic Cells Video Tutorials: Anatomy and Physiology</h1>
+            <button id="dark-mode-toggle" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded">Toggle Dark Mode</button>
+        </div>
+
+        <!-- Homepage -->
+        <div id="page-home" class="page active">
+            <p class="mb-6">Part I. Intro to the Anatomy and Physiology of Eukaryotic Cells<br>
+            Explore video tutorials below to learn about eukaryotic cells. Click a title to view the video and take a quiz. Use the textbook for detailed information.</p>
+            <input type="text" id="name-input" placeholder="Enter your name..." aria-label="Enter your name" value="">
+            <button id="check-progress" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mb-4">Check Progress</button>
+            <input type="text" id="search-bar" placeholder="Search videos..." aria-label="Search videos">
+            <div id="video-list">
+                <div class="video-entry" data-title="Fluid Mosaic Model of the Cell Membrane" data-description="Short video on plasma membrane structure and fluid mosaic model (1m26s)">
+                    <h2 class="text-xl font-semibold mb-2"><a href="#video-1">Fluid Mosaic Model of the Cell Membrane</a></h2>
+                    <p class="mb-2">This is a short video that shows the basic structure of the plasma membrane and the fluid mosaic model (1m26s)</p>
+                </div>
+                <div class="video-entry" data-title="AP1: BIOCHEMISTRY: PHOSPHOLIPIDS" data-description="Phospholipid structure and bilayer formation (2m6s)">
+                    <h2 class="text-xl font-semibold mb-2"><a href="#video-2">AP1: BIOCHEMISTRY: PHOSPHOLIPIDS</a></h2>
+                    <p class="mb-2">This video has a nice description of phospholipid structure and how they can build a bilayer (2m6s)</p>
+                </div>
+                <div class="video-entry" data-title="The Cell Membrane" data-description="Detailed video about the fluid mosaic model and plasma membrane (6m22s)">
+                    <h2 class="text-xl font-semibold mb-2"><a href="#video-3">The Cell Membrane</a></h2>
+                    <p class="mb-2">This is a more detailed video about the fluid mosaic model and the structure and function of the plasma membrane (6m22s)</p>
+                </div>
+                <div class="video-entry" data-title="Biology: Cell Structure I Nucleus Medical Media" data-description="Animations showing eukaryotic cell structure and organelles (7m21s)">
+                    <h2 class="text-xl font-semibold mb-2"><a href="#video-4">Biology: Cell Structure I Nucleus Medical Media</a></h2>
+                    <p class="mb-2">This video has great animations showing the structure of eukaryotic cells (7m21s)</p>
+                </div>
+                <div class="video-entry" data-title="The Inner Life of the Cell_Protein Packing" data-description="Animation of protein and macromolecule activity in cytosol (3m48s)">
+                    <h2 class="text-xl font-semibold mb-2"><a href="#video-5">The Inner Life of the Cell_Protein Packing</a></h2>
+                    <p class="mb-2">This video shows a nice animation to visualize how busy with proteins the cytosol is (3m48s)</p>
+                </div>
+                <div class="video-entry" data-title="Organelles of a human cell" data-description="Visually stunning animation of eukaryotic cell structure (4m38s)">
+                    <h2 class="text-xl font-semibold mb-2"><a href="#video-6">Organelles of a human cell</a></h2>
+                    <p class="mb-2">A visually stunning computer animation summarizing the structure of eukaryotic cells (4m38s)</p>
+                </div>
+                <div class="video-entry" data-title="Cell Differentiation" data-description="Introduction to stem cells and cell differentiation (2m21s)">
+                    <h2 class="text-xl font-semibold mb-2"><a href="#video-7">Cell Differentiation</a></h2>
+                    <p class="mb-2">This short video has a nice introduction to stem cells and cell differentiation (2m21s)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Pages -->
+        <div id="page-video-1" class="page">
+            <nav class="mb-4"><a href="#home">Home</a></nav>
+            <h2 class="text-xl font-semibold mb-2">Fluid Mosaic Model of the Cell Membrane</h2>
+            <p class="mb-2">This is a short video that shows the basic structure of the plasma membrane and the fluid mosaic model (1m26s)</p>
+            <iframe id="player-1" class="w-full h-64 mb-4" src="https://www.youtube.com/embed/LKN5sq5dtW4?enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <label class="flex items-center mb-4"><input type="checkbox" class="watched-checkbox mr-2" data-video="video-1" disabled> Mark as watched</label>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="openModal('quiz-1')">Take Quiz</button>
+        </div>
+        <div id="page-video-2" class="page">
+            <nav class="mb-4"><a href="#home">Home</a></nav>
+            <h2 class="text-xl font-semibold mb-2">AP1: BIOCHEMISTRY: PHOSPHOLIPIDS</h2>
+            <p class="mb-2">This video has a nice description of phospholipid structure and how they can build a bilayer that forms a barrier to polar/charged molecules. (2m6s)</p>
+            <iframe id="player-2" class="w-full h-64 mb-4" src="https://www.youtube.com/embed/sHN7e52Gh4U?enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <label class="flex items-center mb-4"><input type="checkbox" class="watched-checkbox mr-2" data-video="video-2" disabled> Mark as watched</label>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="openModal('quiz-2')">Take Quiz</button>
+        </div>
+        <div id="page-video-3" class="page">
+            <nav class="mb-4"><a href="#home">Home</a></nav>
+            <h2 class="text-xl font-semibold mb-2">The Cell Membrane</h2>
+            <p class="mb-2">This is a more detailed video about the fluid mosaic model and the structure and function of the plasma membrane. (6m22s)</p>
+            <iframe id="player-3" class="w-full h-64 mb-4" src="https://www.youtube.com/embed/S7CJ7xZOjm0?enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <label class="flex items-center mb-4"><input type="checkbox" class="watched-checkbox mr-2" data-video="video-3" disabled> Mark as watched</label>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="openModal('quiz-3')">Take Quiz</button>
+        </div>
+        <div id="page-video-4" class="page">
+            <nav class="mb-4"><a href="#home">Home</a></nav>
+            <h2 class="text-xl font-semibold mb-2">Biology: Cell Structure I Nucleus Medical Media</h2>
+            <p class="mb-2">This video has great animations showing the structure of eukaryotic cells, giving a very nice survey of the different organelles and their functions. (7m21s)</p>
+            <iframe id="player-4" class="w-full h-64 mb-4" src="https://www.youtube.com/embed/URUJD5NEXC8?enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <label class="flex items-center mb-4"><input type="checkbox" class="watched-checkbox mr-2" data-video="video-4" disabled> Mark as watched</label>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="openModal('quiz-4')">Take Quiz</button>
+        </div>
+        <div id="page-video-5" class="page">
+            <nav class="mb-4"><a href="#home">Home</a></nav>
+            <h2 class="text-xl font-semibold mb-2">The Inner Life of the Cell_Protein Packing</h2>
+            <p class="mb-2">This video shows a nice animation to visualize more realistically how busy with proteins and other macromolecules the cytosol of a cell is. (3m48s)</p>
+            <iframe id="player-5" class="w-full h-64 mb-4" src="https://www.youtube.com/embed/1OucGvtSw_k?enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <label class="flex items-center mb-4"><input type="checkbox" class="watched-checkbox mr-2" data-video="video-5" disabled> Mark as watched</label>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="openModal('quiz-5')">Take Quiz</button>
+        </div>
+        <div id="page-video-6" class="page">
+            <nav class="mb-4"><a href="#home">Home</a></nav>
+            <h2 class="text-xl font-semibold mb-2">Organelles of a human cell</h2>
+            <p class="mb-2">A visually stunning computer animation summarizing the structure of the eukaryotic cells, covering some cellular organelles, and some of the molecular processes that take place in various parts of the cell. (4m38s)</p>
+            <iframe id="player-6" class="w-full h-64 mb-4" src="https://www.youtube.com/embed/2YCgro6BV8U?enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <label class="flex items-center mb-4"><input type="checkbox" class="watched-checkbox mr-2" data-video="video-6" disabled> Mark as watched</label>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="openModal('quiz-6')">Take Quiz</button>
+        </div>
+        <div id="page-video-7" class="page">
+            <nav class="mb-4"><a href="#home">Home</a></nav>
+            <h2 class="text-xl font-semibold mb-2">Cell Differentiation</h2>
+            <p class="mb-2">This short video has a nice introduction to stem cells and cell differentiation. (2m21s)</p>
+            <iframe id="player-7" class="w-full h-64 mb-4" src="https://www.youtube.com/embed/U273tVOoWHk?enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <label class="flex items-center mb-4"><input type="checkbox" class="watched-checkbox mr-2" data-video="video-7" disabled> Mark as watched</label>
+            <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="openModal('quiz-7')">Take Quiz</button>
+        </div>
+
+        <!-- Quiz Modals -->
+        <div id="quiz-1" class="modal">
+            <div class="modal-content">
+                <h3 class="text-lg font-semibold mb-4">Quiz: Fluid Mosaic Model</h3>
+                <div class="mb-4">
+                    <p class="font-semibold">1. What is the primary component of the cell membrane?</p>
+                    <label><input type="radio" name="q1" value="a"> a) Proteins</label><br>
+                    <label><input type="radio" name="q1" value="b"> b) Phospholipids</label><br>
+                    <label><input type="radio" name="q1" value="c"> c) Carbohydrates</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">2. What does the "fluid" in fluid mosaic model refer to?</p>
+                    <label><input type="radio" name="q2" value="a"> a) Water content</label><br>
+                    <label><input type="radio" name="q2" value="b"> b) Lateral movement of lipids</label><br>
+                    <label><input type="radio" name="q2" value="c"> c) Protein rigidity</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">3. What is embedded in the phospholipid bilayer?</p>
+                    <label><input type="radio" name="q3" value="a"> a) DNA</label><br>
+                    <label><input type="radio" name="q3" value="b"> b) Proteins</label><br>
+                    <label><input type="radio" name="q3" value="c"> c) Mitochondria</label><br>
+                </div>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="submitQuiz('quiz-1', ['b', 'b', 'b'], 'video-1')">Submit</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2" onclick="closeModal('quiz-1')">Close</button>
+                <p id="quiz-1-result" class="mt-4"></p>
+            </div>
+        </div>
+        <div id="quiz-2" class="modal">
+            <div class="modal-content">
+                <h3 class="text-lg font-semibold mb-4">Quiz: Phospholipids</h3>
+                <div class="mb-4">
+                    <p class="font-semibold">1. What is the polar part of a phospholipid?</p>
+                    <label><input type="radio" name="q1" value="a"> a) Fatty acid tails</label><br>
+                    <label><input type="radio" name="q1" value="b"> b) Glycerol backbone</label><br>
+                    <label><input type="radio" name="q1" value="c"> c) Phosphate head</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">2. How do phospholipids form a bilayer?</p>
+                    <label><input type="radio" name="q2" value="a"> a) Heads face inward</label><br>
+                    <label><input type="radio" name="q2" value="b"> b) Tails face outward</label><br>
+                    <label><input type="radio" name="q2" value="c"> c) Heads face water, tails inward</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">3. What type of molecules does the bilayer block?</p>
+                    <label><input type="radio" name="q3" value="a"> a) Nonpolar</label><br>
+                    <label><input type="radio" name="q3" value="b"> b) Polar/charged</label><br>
+                    <label><input type="radio" name="q3" value="c"> c) Small gases</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">4. What bond can the oxygen in phospholipids form?</p>
+                    <label><input type="radio" name="q4" value="a"> a) Ionic</label><br>
+                    <label><input type="radio" name="q4" value="b"> b) Hydrogen</label><br>
+                    <label><input type="radio" name="q4" value="c"> c) Covalent</label><br>
+                </div>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="submitQuiz('quiz-2', ['c', 'c', 'b', 'b'], 'video-2')">Submit</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2" onclick="closeModal('quiz-2')">Close</button>
+                <p id="quiz-2-result" class="mt-4"></p>
+            </div>
+        </div>
+        <div id="quiz-3" class="modal">
+            <div class="modal-content">
+                <h3 class="text-lg font-semibold mb-4">Quiz: The Cell Membrane</h3>
+                <div class="mb-4">
+                    <p class="font-semibold">1. What model describes the cell membrane structure?</p>
+                    <label><input type="radio" name="q1" value="a"> a) Solid mosaic model</label><br>
+                    <label><input type="radio" name="q1" value="b"> b) Fluid mosaic model</label><br>
+                    <label><input type="radio" name="q1" value="c"> c) Rigid bilayer model</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">2. What contributes to the membrane’s fluidity?</p>
+                    <label><input type="radio" name="q2" value="a"> a) Protein anchoring</label><br>
+                    <label><input type="radio" name="q2" value="b"> b) Lateral movement of lipids</label><br>
+                    <label><input type="radio" name="q2" value="c"> c) Fixed cholesterol</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">3. What is a key function of the cell membrane?</p>
+                    <label><input type="radio" name="q3" value="a"> a) DNA replication</label><br>
+                    <label><input type="radio" name="q3" value="b"> b) Selective permeability</label><br>
+                    <label><input type="radio" name="q3" value="c"> c) Protein synthesis</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">4. What type of molecules pass easily through the membrane?</p>
+                    <label><input type="radio" name="q4" value="a"> a) Large polar molecules</label><br>
+                    <label><input type="radio" name="q4" value="b"> b) Small nonpolar molecules</label><br>
+                    <label><input type="radio" name="q4" value="c"> c) Charged ions</label><br>
+                </div>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="submitQuiz('quiz-3', ['b', 'b', 'b', 'b'], 'video-3')">Submit</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2" onclick="closeModal('quiz-3')">Close</button>
+                <p id="quiz-3-result" class="mt-4"></p>
+            </div>
+        </div>
+        <div id="quiz-4" class="modal">
+            <div class="modal-content">
+                <h3 class="text-lg font-semibold mb-4">Quiz: Cell Structure</h3>
+                <div class="mb-4">
+                    <p class="font-semibold">1. What organelle houses the cell’s DNA?</p>
+                    <label><input type="radio" name="q1" value="a"> a) Mitochondrion</label><br>
+                    <label><input type="radio" name="q1" value="b"> b) Nucleus</label><br>
+                    <label><input type="radio" name="q1" value="c"> c) Endoplasmic Reticulum</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">2. What is the function of mitochondria?</p>
+                    <label><input type="radio" name="q2" value="a"> a) Protein synthesis</label><br>
+                    <label><input type="radio" name="q2" value="b"> b) Energy production</label><br>
+                    <label><input type="radio" name="q2" value="c"> c) Lipid storage</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">3. What organelle is involved in protein modification?</p>
+                    <label><input type="radio" name="q3" value="a"> a) Golgi apparatus</label><br>
+                    <label><input type="radio" name="q3" value="b"> b) Lysosome</label><br>
+                    <label><input type="radio" name="q3" value="c"> c) Ribosome</label><br>
+                </div>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="submitQuiz('quiz-4', ['b', 'b', 'a'], 'video-4')">Submit</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2" onclick="closeModal('quiz-4')">Close</button>
+                <p id="quiz-4-result" class="mt-4"></p>
+            </div>
+        </div>
+        <div id="quiz-5" class="modal">
+            <div class="modal-content">
+                <h3 class="text-lg font-semibold mb-4">Quiz: Protein Packing</h3>
+                <div class="mb-4">
+                    <p class="font-semibold">1. What is the cytosol primarily composed of?</p>
+                    <label><input type="radio" name="q1" value="a"> a) Water and macromolecules</label><br>
+                    <label><input type="radio" name="q1" value="b"> b) Lipids and carbohydrates</label><br>
+                    <label><input type="radio" name="q1" value="c"> c) DNA and RNA</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">2. What makes the cytosol appear busy?</p>
+                    <label><input type="radio" name="q2" value="a"> a) Static organelles</label><br>
+                    <label><input type="radio" name="q2" value="b"> b) Protein and macromolecule movement</label><br>
+                    <label><input type="radio" name="q2" value="c"> c) Lipid accumulation</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">3. What is a key feature of the cytosol shown in the animation?</p>
+                    <label><input type="radio" name="q3" value="a"> a) Empty space</label><br>
+                    <label><input type="radio" name="q3" value="b"> b) High molecular density</label><br>
+                    <label><input type="radio" name="q3" value="c"> c) Rigid structure</label><br>
+                </div>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="submitQuiz('quiz-5', ['a', 'b', 'b'], 'video-5')">Submit</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2" onclick="closeModal('quiz-5')">Close</button>
+                <p id="quiz-5-result" class="mt-4"></p>
+            </div>
+        </div>
+        <div id="quiz-6" class="modal">
+            <div class="modal-content">
+                <h3 class="text-lg font-semibold mb-4">Quiz: Organelles of a Human Cell</h3>
+                <div class="mb-4">
+                    <p class="font-semibold">1. What organelle degrades waste materials?</p>
+                    <label><input type="radio" name="q1" value="a"> a) Lysosome</label><br>
+                    <label><input type="radio" name="q1" value="b"> b) Peroxisome</label><br>
+                    <label><input type="radio" name="q1" value="c"> c) Nucleus</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">2. What process occurs in the endoplasmic reticulum?</p>
+                    <label><input type="radio" name="q2" value="a"> a) DNA replication</label><br>
+                    <label><input type="radio" name="q2" value="b"> b) Protein synthesis</label><br>
+                    <label><input type="radio" name="q2" value="c"> c) Energy production</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">3. What is a feature of the animation’s depiction?</p>
+                    <label><input type="radio" name="q3" value="a"> a) Simplified organelle movement</label><br>
+                    <label><input type="radio" name="q3" value="b"> b) Realistic molecular detail</label><br>
+                    <label><input type="radio" name="q3" value="c"> c) Minimal molecular detail</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">4. What organelle is shown in the animation?</p>
+                    <label><input type="radio" name="q4" value="a"> a) Chloroplast</label><br>
+                    <label><input type="radio" name="q4" value="b"> b) Mitochondrion</label><br>
+                    <label><input type="radio" name="q4" value="c"> c) Cell wall</label><br>
+                </div>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="submitQuiz('quiz-6', ['a', 'b', 'b', 'b'], 'video-6')">Submit</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2" onclick="closeModal('quiz-6')">Close</button>
+                <p id="quiz-6-result" class="mt-4"></p>
+            </div>
+        </div>
+        <div id="quiz-7" class="modal">
+            <div class="modal-content">
+                <h3 class="text-lg font-semibold mb-4">Quiz: Cell Differentiation</h3>
+                <div class="mb-4">
+                    <p class="font-semibold">1. What are stem cells capable of?</p>
+                    <label><input type="radio" name="q1" value="a"> a) Differentiating into multiple cell types</label><br>
+                    <label><input type="radio" name="q1" value="b"> b) Producing energy</label><br>
+                    <label><input type="radio" name="q1" value="c"> c) Synthesizing lipids</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">2. What is cell differentiation?</p>
+                    <label><input type="radio" name="q2" value="a"> a) Cell division</label><br>
+                    <label><input type="radio" name="q2" value="b"> b) Specialization into specific cell types</label><br>
+                    <label><input type="radio" name="q2" value="c"> c) Protein degradation</label><br>
+                </div>
+                <div class="mb-4">
+                    <p class="font-semibold">3. What type of stem cells are mentioned in the video?</p>
+                    <label><input type="radio" name="q3" value="a"> a) Embryonic stem cells</label><br>
+                    <label><input type="radio" name="q3" value="b"> b) Bacterial stem cells</label><br>
+                    <label><input type="radio" name="q3" value="c"> c) Plant stem cells</label><br>
+                </div>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="submitQuiz('quiz-7', ['a', 'b', 'a'], 'video-7')">Submit</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2" onclick="closeModal('quiz-7')">Close</button>
+                <p id="quiz-7-result" class="mt-4"></p>
+            </div>
+        </div>
+
+        <!-- Progress Modal -->
+        <div id="progress-modal" class="modal">
+            <div class="modal-content">
+                <h3 class="text-lg font-semibold mb-4">Progress Report</h3>
+                <p id="progress-content" class="mb-4"></p>
+                <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="downloadReport()">Download Report</button>
+                <button class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2" onclick="closeModal('progress-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // YouTube IFrame API setup
+        let players = {};
+        let timers = {};
+
+        function onYouTubeIframeAPIReady() {
+            ['1', '2', '3', '4', '5', '6', '7'].forEach(id => {
+                players[id] = new YT.Player(`player-${id}`, {
+                    events: {
+                        'onStateChange': (event) => {
+                            if (event.data === YT.PlayerState.PLAYING) {
+                                // Clear any existing timer to avoid multiple triggers
+                                if (timers[id]) clearTimeout(timers[id]);
+                                // Set a 30-second timer to enable the checkbox
+                                timers[id] = setTimeout(() => {
+                                    const checkbox = document.querySelector(`input[data-video="video-${id}"]`);
+                                    if (checkbox) checkbox.disabled = false;
+                                }, 30000); // 30 seconds
+                            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                                // Clear timer if video is paused or ended before 30 seconds
+                                if (timers[id]) clearTimeout(timers[id]);
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Page navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+        }
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pageId = link.getAttribute('href').slice(1);
+                showPage(pageId);
+            });
+        });
+        if (window.location.hash) {
+            showPage(window.location.hash.slice(1));
+        }
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        darkModeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+        });
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Search functionality
+        const searchBar = document.getElementById('search-bar');
+        searchBar.addEventListener('input', () => {
+            const query = searchBar.value.toLowerCase();
+            document.querySelectorAll('.video-entry').forEach(entry => {
+                const title = entry.dataset.title.toLowerCase();
+                const description = entry.dataset.description.toLowerCase();
+                entry.style.display = (title.includes(query) || description.includes(query)) ? 'block' : 'none';
+            });
+        });
+
+        // Name and progress tracking
+        const nameInput = document.getElementById('name-input');
+        nameInput.value = localStorage.getItem('userName') || '';
+        nameInput.addEventListener('input', () => {
+            localStorage.setItem('userName', nameInput.value);
+        });
+
+        document.querySelectorAll('.watched-checkbox').forEach(checkbox => {
+            const videoId = checkbox.dataset.video;
+            if (localStorage.getItem(videoId) === 'watched') {
+                checkbox.checked = true;
+                checkbox.disabled = false;
+            }
+            checkbox.addEventListener('change', () => {
+                localStorage.setItem(videoId, checkbox.checked ? 'watched' : '');
+            });
+        });
+
+        // Quiz functionality
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId.startsWith('quiz-')) {
+                document.getElementById(`${modalId}-result`).textContent = '';
+                document.querySelectorAll(`#${modalId} input[type="radio"]`).forEach(input => input.checked = false);
+            }
+        }
+        function submitQuiz(quizId, correctAnswers, videoId) {
+            const answers = [];
+            for (let i = 1; i <= correctAnswers.length; i++) {
+                answers.push(document.querySelector(`#${quizId} input[name="q${i}"]:checked`)?.value);
+            }
+            let score = 0;
+            answers.forEach((answer, index) => {
+                if (answer === correctAnswers[index]) score++;
+            });
+            const resultText = `You scored ${score}/${correctAnswers.length}! ${score === correctAnswers.length ? 'Great job!' : 'Review the video and try again.'}`;
+            document.getElementById(`${quizId}-result`).textContent = resultText;
+            localStorage.setItem(`${quizId}-score`, `${score}/${correctAnswers.length}`);
+            
+            // Enable the "Mark as watched" checkbox for the corresponding video
+            const checkbox = document.querySelector(`input[data-video="${videoId}"]`);
+            if (checkbox) checkbox.disabled = false;
+        }
+
+        // Progress report
+        document.getElementById('check-progress').addEventListener('click', () => {
+            const name = localStorage.getItem('userName') || 'User';
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const validationCode = (year - day) * (month * day);
+            const videosWatched = Array.from(document.querySelectorAll('.watched-checkbox')).filter(cb => cb.checked).length;
+            const quizScores = [];
+            ['1', '2', '3', '4', '5', '6', '7'].forEach(id => {
+                const score = localStorage.getItem(`quiz-${id}-score`);
+                if (score) quizScores.push(`Quiz ${id}: ${score}`);
+            });
+
+            const report = `
+Progress Report for ${name}
+Date: ${date.toLocaleDateString()}
+Validation Code: ${validationCode}
+Videos Watched: ${videosWatched}/7
+Quiz Scores:
+${quizScores.length ? quizScores.join('\n') : 'No quizzes completed'}
+            `.trim();
+
+            document.getElementById('progress-content').textContent = report;
+            openModal('progress-modal');
+            localStorage.setItem('progress-report', report);
+        });
+
+        function downloadReport() {
+            const report = localStorage.getItem('progress-report') || 'No report available';
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `progress_report_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
